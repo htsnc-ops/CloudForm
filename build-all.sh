@@ -3,7 +3,7 @@
 set -e
 
 # Configuration
-GITHUB_USER=${GITHUB_USER:-"your-github-username"}
+GITHUB_USER=${GITHUB_USER:-"htsnc-ops"}
 VERSION=${VERSION:-"1.0.0"}
 REGISTRY="ghcr.io"
 
@@ -22,6 +22,7 @@ if ! docker info | grep -q "Username"; then
     echo ""
     echo "Please login first:"
     echo "  export GITHUB_TOKEN=your_token"
+    echo "  token is at c/Users/Tom/token.txt
     echo "  echo \$GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin"
     exit 1
 fi
