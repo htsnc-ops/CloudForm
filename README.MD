@@ -1,9 +1,5 @@
 # CloudForm - A Cloud Management Platform
 
-[port]: #### Port
-[purpose]: ### Purpose
-[features]: ### Features
-
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                         Frontend                             │
@@ -47,7 +43,7 @@ Communication: REST API, WebSocket
 
 ## 2. API Gateway (NGINX)
 
-[purpose]
+### Purpose
 
 Route traffic, SSL Termination, Rate limiting
 
@@ -64,7 +60,7 @@ Route traffic, SSL Termination, Rate limiting
 
 Identity and access management
 
-[features]
+### Features
 
 1. User auth
 2. RBAC
@@ -94,7 +90,7 @@ Identity and access management
 
 ## 5. Terminal Service (Node.Js with Socket.io)
 
-[features]
+### Features
 
 1. WebSocket connection per user session
 2. PTY (pseudo-terminal) allocation
@@ -102,7 +98,7 @@ Identity and access management
 4. Output streaming
 5. Session management
 
-[port]
+#### Port
 
 8081
 
