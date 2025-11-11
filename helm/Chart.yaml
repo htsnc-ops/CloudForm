@@ -1,0 +1,30 @@
+---
+apiVersion: v2
+name: cloud-portal
+description: Multi-tenant cloud management portal with container isolation
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - cloud
+  - multi-tenant
+  - terminal
+  - azure
+  - aws
+  - gcp
+maintainers:
+  - name: Cloud Portal Team
+    email: team@example.com
+dependencies:
+  - name: keycloak
+    version: "18.x.x"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: keycloak.enabled
+  - name: vault
+    version: "0.27.x"
+    repository: "https://helm.releases.hashicorp.com"
+    condition: vault.enabled
+  - name: postgresql
+    version: "13.x.x"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: postgresql.enabled

@@ -1,0 +1,193 @@
+{{- if .Values.networkPolicy.enabled }}
+---
+# Network Policy for Portal API
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "cloud-portal.fullname" . }}-api
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "cloud-portal.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "cloud-portal.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: api
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: {{ .Values.namespace }}
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 8080
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: {{ .Values.namespace }}
+    - namespaceSelector:
+        matchLabels:
+          name: {{ .Values.containers.namespace }}
+    ports:
+    - protocol: TCP
+      port: 5432  # PostgreSQL
+    - protocol: TCP
+      port: 8080  # Keycloak
+    - protocol: TCP
+      port: 8200  # Vault
+  - to:
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+  - to:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443  # Kubernetes API
+---
+# Network Policy for Terminal Service
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "cloud-portal.fullname" . }}-terminal
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "cloud-portal.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "cloud-portal.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: terminal
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: {{ .Values.namespace }}
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 8081
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: {{ .Values.containers.namespace }}
+    ports:
+    - protocol: TCP
+      port: 1-65535  # Allow exec into containers
+  - to:
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+  - to:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443  # Kubernetes API
+    - protocol: TCP
+      port: 8080  # Keycloak for JWT validation
+---
+# Network Policy for Frontend
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "cloud-portal.fullname" . }}-frontend
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "cloud-portal.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "cloud-portal.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: frontend
+  policyTypes:
+    - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: {{ .Values.namespace }}
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 80
+---
+# Network Policy for Client Containers
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "cloud-portal.fullname" . }}-containers
+  namespace: {{ .Values.containers.namespace }}
+  labels:
+    {{- include "cloud-portal.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "cloud-portal.name" . }}
+      app.kubernetes.io/component: container-runtime
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: {{ .Values.namespace }}
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/component: terminal
+    - namespaceSelector:
+        matchLabels:
+          name: {{ .Values.namespace }}
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/component: api
+  egress:
+  # Allow DNS
+  - to:
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+  # Allow external cloud API access
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+  # Block access to internal cluster services
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: {{ .Values.namespace }}
+    ports:
+    - protocol: TCP
+      port: 5432
+{{- end }}

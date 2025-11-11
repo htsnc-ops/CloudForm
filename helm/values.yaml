@@ -1,0 +1,345 @@
+---
+# Global settings
+global:
+  domain: portal.example.com
+  storageClass: standard
+  imagePullSecrets: []
+
+# Namespace
+namespace: cloud-portal
+
+# Portal API Service
+portalApi:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: your-registry/cloud-portal-api
+    tag: 1.0.0
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  
+  env:
+    logLevel: info
+    sessionTimeout: 3600
+    maxContainersPerUser: 5
+    containerNamespace: cloud-portal-containers
+  
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# Terminal Service
+terminalService:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: your-registry/cloud-portal-terminal
+    tag: 1.0.0
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 8081
+    targetPort: 8081
+  
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+  
+  env:
+    logLevel: info
+    heartbeatInterval: 30000
+    connectionTimeout: 300000
+    maxConnectionsPerPod: 100
+
+# Frontend
+frontend:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: your-registry/cloud-portal-frontend
+    tag: 1.0.0
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 80
+  
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+  
+  config:
+    apiUrl: /api
+    wsUrl: /ws
+
+# Container Settings
+containers:
+  namespace: cloud-portal-containers
+  images:
+    azure: mcr.microsoft.com/azure-cli:latest
+    aws: amazon/aws-cli:latest
+    gcp: google/cloud-sdk:latest
+  
+  defaultResources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  
+  defaultTimeout: 3600  # 1 hour
+  idleTimeout: 900      # 15 minutes
+  cleanupInterval: 300  # 5 minutes
+
+# Ingress
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/websocket-services: terminal-service
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  
+  hosts:
+    - host: portal.example.com
+      paths:
+        - path: /api
+          pathType: Prefix
+          backend: portal-api
+        - path: /ws
+          pathType: Prefix
+          backend: terminal-service
+        - path: /auth
+          pathType: Prefix
+          backend: keycloak
+        - path: /
+          pathType: Prefix
+          backend: frontend
+  
+  tls:
+    - secretName: cloud-portal-tls
+      hosts:
+        - portal.example.com
+
+# Keycloak (Auth)
+keycloak:
+  enabled: true
+  auth:
+    adminUser: admin
+    adminPassword: changeme123
+  
+  postgresql:
+    enabled: true
+    auth:
+      username: keycloak
+      password: keycloak123
+      database: keycloak
+  
+  service:
+    type: ClusterIP
+    port: 8080
+  
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  
+  extraEnvVars:
+    - name: KEYCLOAK_EXTRA_ARGS
+      value: "--import-realm"
+
+# HashiCorp Vault
+vault:
+  enabled: true
+  server:
+    standalone:
+      enabled: true
+      config: |
+        ui = true
+        listener "tcp" {
+          tls_disable = 1
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+        }
+        storage "file" {
+          path = "/vault/data"
+        }
+    
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "250m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+    
+    dataStorage:
+      enabled: true
+      size: 10Gi
+      storageClass: standard
+  
+  ui:
+    enabled: true
+
+# PostgreSQL (Application Database)
+postgresql:
+  enabled: true
+  auth:
+    username: cloudportal
+    password: cloudportal123
+    database: cloudportal
+  
+  primary:
+    persistence:
+      enabled: true
+      size: 20Gi
+      storageClass: standard
+    
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "250m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+  
+  metrics:
+    enabled: true
+
+# RBAC
+rbac:
+  create: true
+  
+  # Service Account for Portal API
+  portalApi:
+    create: true
+    name: portal-api-sa
+    annotations: {}
+  
+  # Service Account for Terminal Service
+  terminalService:
+    create: true
+    name: terminal-service-sa
+    annotations: {}
+  
+  # Service Account for Client Containers
+  clientContainers:
+    create: true
+    name: cloud-portal-client
+    annotations: {}
+
+# Network Policies
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+
+# Monitoring
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+  
+  prometheusRule:
+    enabled: true
+    rules:
+      - alert: HighContainerCount
+        expr: cloudportal_active_containers > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of active containers"
+      
+      - alert: HighAPILatency
+        expr: cloudportal_api_request_duration_seconds > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API response time is high"
+
+# Security
+security:
+  podSecurityPolicy:
+    enabled: false
+  
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    capabilities:
+      drop:
+        - ALL
+
+# Persistence
+persistence:
+  enabled: true
+  storageClass: standard
+  accessMode: ReadWriteOnce
+  size: 10Gi

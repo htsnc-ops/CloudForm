@@ -1,0 +1,32 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "cloud-portal.fullname" . }}-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "cloud-portal.labels" . | nindent 4 }}
+data:
+  container-images.json: |
+    {
+      "azure": "{{ .Values.containers.images.azure }}",
+      "aws": "{{ .Values.containers.images.aws }}",
+      "gcp": "{{ .Values.containers.images.gcp }}"
+    }
+  container-resources.json: |
+    {
+      "requests": {
+        "memory": "{{ .Values.containers.defaultResources.requests.memory }}",
+        "cpu": "{{ .Values.containers.defaultResources.requests.cpu }}"
+      },
+      "limits": {
+        "memory": "{{ .Values.containers.defaultResources.limits.memory }}",
+        "cpu": "{{ .Values.containers.defaultResources.limits.cpu }}"
+      }
+    }
+  timeouts.json: |
+    {
+      "default": {{ .Values.containers.defaultTimeout }},
+      "idle": {{ .Values.containers.idleTimeout }},
+      "cleanup": {{ .Values.containers.cleanupInterval }}
+    }

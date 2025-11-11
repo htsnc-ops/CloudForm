@@ -1,0 +1,53 @@
+{{- if .Values.rbac.create }}
+---
+# Bind Portal API to its role in main namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "cloud-portal.fullname" . }}-api
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "cloud-portal.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "cloud-portal.fullname" . }}-api
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.rbac.portalApi.name }}
+  namespace: {{ .Values.namespace }}
+---
+# Bind Portal API to container management role
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "cloud-portal.fullname" . }}-api-containers
+  namespace: {{ .Values.containers.namespace }}
+  labels:
+    {{- include "cloud-portal.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "cloud-portal.fullname" . }}-api-containers
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.rbac.portalApi.name }}
+  namespace: {{ .Values.namespace }}
+---
+# Bind Terminal Service to container exec role
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "cloud-portal.fullname" . }}-terminal-containers
+  namespace: {{ .Values.containers.namespace }}
+  labels:
+    {{- include "cloud-portal.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "cloud-portal.fullname" . }}-terminal-containers
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.rbac.terminalService.name }}
+  namespace: {{ .Values.namespace }}
+{{- end }}

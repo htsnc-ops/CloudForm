@@ -1,0 +1,35 @@
+{{- if .Values.portalApi.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "cloud-portal.fullname" . }}-api
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "cloud-portal.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "cloud-portal.fullname" . }}-api
+  minReplicas: {{ .Values.portalApi.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.portalApi.autoscaling.maxReplicas }}
+  metrics:
+  {{- if .Values.portalApi.autoscaling.targetCPUUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.portalApi.autoscaling.targetCPUUtilizationPercentage }}
+  {{- end }}
+  {{- if .Values.portalApi.autoscaling.targetMemoryUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.portalApi.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- end }}
+{{- end }}

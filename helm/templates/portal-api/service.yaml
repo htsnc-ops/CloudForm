@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "cloud-portal.fullname" . }}-api
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "cloud-portal.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  type: {{ .Values.portalApi.service.type }}
+  ports:
+  - port: {{ .Values.portalApi.service.port }}
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    {{- include "cloud-portal.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: api

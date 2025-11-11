@@ -1,0 +1,48 @@
+---
+# Resource Quota for Container Namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: {{ include "cloud-portal.fullname" . }}-containers
+  namespace: {{ .Values.containers.namespace }}
+  labels:
+    {{- include "cloud-portal.labels" . | nindent 4 }}
+spec:
+  hard:
+    requests.cpu: "50"
+    requests.memory: 50Gi
+    limits.cpu: "100"
+    limits.memory: 100Gi
+    pods: "100"
+    persistentvolumeclaims: "50"
+---
+# Limit Range for Container Namespace
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: {{ include "cloud-portal.fullname" . }}-containers
+  namespace: {{ .Values.containers.namespace }}
+  labels:
+    {{- include "cloud-portal.labels" . | nindent 4 }}
+spec:
+  limits:
+  - max:
+      cpu: "2"
+      memory: 2Gi
+    min:
+      cpu: "100m"
+      memory: 128Mi
+    default:
+      cpu: "500m"
+      memory: 512Mi
+    defaultRequest:
+      cpu: "250m"
+      memory: 256Mi
+    type: Container
+  - max:
+      cpu: "4"
+      memory: 4Gi
+    min:
+      cpu: "100m"
+      memory: 128Mi
+    type: Pod

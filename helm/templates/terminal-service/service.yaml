@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "cloud-portal.fullname" . }}-terminal
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "cloud-portal.labels" . | nindent 4 }}
+    app.kubernetes.io/component: terminal
+spec:
+  type: {{ .Values.terminalService.service.type }}
+  ports:
+  - port: {{ .Values.terminalService.service.port }}
+    targetPort: ws
+    protocol: TCP
+    name: ws
+  selector:
+    {{- include "cloud-portal.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: terminal

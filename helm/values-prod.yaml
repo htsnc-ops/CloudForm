@@ -1,0 +1,60 @@
+---
+global:
+  domain: portal.example.com
+
+portalApi:
+  replicaCount: 3
+  autoscaling:
+    minReplicas: 3
+    maxReplicas: 20
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+terminalService:
+  replicaCount: 3
+  autoscaling:
+    minReplicas: 3
+    maxReplicas: 20
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+frontend:
+  replicaCount: 3
+
+postgresql:
+  primary:
+    persistence:
+      size: 100Gi
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "1000m"
+      limits:
+        memory: "2Gi"
+        cpu: "2000m"
+
+keycloak:
+  replicaCount: 2
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "1000m"
+    limits:
+      memory: "2Gi"
+      cpu: "2000m"
+
+vault:
+  server:
+    ha:
+      enabled: true
+      replicas: 3

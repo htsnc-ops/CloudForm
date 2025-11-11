@@ -1,0 +1,29 @@
+---
+global:
+  domain: portal-dev.example.com
+
+portalApi:
+  replicaCount: 1
+  env:
+    logLevel: debug
+
+terminalService:
+  replicaCount: 1
+
+frontend:
+  replicaCount: 1
+
+keycloak:
+  auth:
+    adminPassword: admin
+  postgresql:
+    auth:
+      password: keycloak
+
+postgresql:
+  auth:
+    password: cloudportal
+
+ingress:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging

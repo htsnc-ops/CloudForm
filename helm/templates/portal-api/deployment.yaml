@@ -1,0 +1,88 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cloud-portal.fullname" . }}-api
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "cloud-portal.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  {{- if not .Values.portalApi.autoscaling.enabled }}
+  replicas: {{ .Values.portalApi.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "cloud-portal.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        {{- include "cloud-portal.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: api
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ .Values.rbac.portalApi.name }}
+      securityContext:
+        {{- toYaml .Values.security.podSecurityContext | nindent 8 }}
+      containers:
+      - name: api
+        securityContext:
+          {{- toYaml .Values.security.containerSecurityContext | nindent 10 }}
+        image: "{{ .Values.portalApi.image.repository }}:{{ .Values.portalApi.image.tag }}"
+        imagePullPolicy: {{ .Values.portalApi.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.portalApi.service.targetPort }}
+          protocol: TCP
+        env:
+        - name: PORT
+          value: "{{ .Values.portalApi.service.targetPort }}"
+        - name: LOG_LEVEL
+          value: "{{ .Values.portalApi.env.logLevel }}"
+        - name: SESSION_TIMEOUT
+          value: "{{ .Values.portalApi.env.sessionTimeout }}"
+        - name: MAX_CONTAINERS_PER_USER
+          value: "{{ .Values.portalApi.env.maxContainersPerUser }}"
+        - name: CONTAINER_NAMESPACE
+          value: "{{ .Values.containers.namespace }}"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "cloud-portal.fullname" . }}-secrets
+              key: database-url
+        - name: KEYCLOAK_URL
+          value: "http://{{ .Release.Name }}-keycloak:{{ .Values.keycloak.service.port }}"
+        - name: KEYCLOAK_REALM
+          value: "cloud-portal"
+        - name: KEYCLOAK_CLIENT_ID
+          value: "portal-api"
+        - name: KEYCLOAK_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "cloud-portal.fullname" . }}-secrets
+              key: keycloak-client-secret
+        - name: VAULT_ADDR
+          value: "http://{{ .Release.Name }}-vault:8200"
+        - name: VAULT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "cloud-portal.fullname" . }}-secrets
+              key: vault-token
+        livenessProbe:
+          {{- toYaml .Values.portalApi.livenessProbe | nindent 10 }}
+        readinessProbe:
+          {{- toYaml .Values.portalApi.readinessProbe | nindent 10 }}
+        resources:
+          {{- toYaml .Values.portalApi.resources | nindent 10 }}
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
