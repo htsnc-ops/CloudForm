@@ -1,5 +1,9 @@
 # CloudForm - A Cloud Management Platform
 
+[port]: #### Port
+[purpose]: ### Purpose
+[features]: ### Features
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                         Frontend                             │
@@ -43,9 +47,11 @@ Communication: REST API, WebSocket
 
 ## 2. API Gateway (NGINX)
 
-Purpose: Route traffic, SSL Termination, Rate limiting
+[purpose]
 
-Routes:
+Route traffic, SSL Termination, Rate limiting
+
+### Routes
 
 1. `/api/*` -> Portal API
 2. `/ws/*` -> Terminal Service
@@ -54,23 +60,24 @@ Routes:
 
 ## 3. Keycloak (Auth)
 
-Purpose: Identity and access management
+[purpose]
 
-Features:
+Identity and access management
+
+[features]
 
 1. User auth
 2. RBAC
 3. Client Identity Management
 
-Realms:
-`master`: Admin realm
-`cloud-portal`: Application realm
+### Realms
+
+1. `master`: Admin realm
+2. `cloud-portal`: Application realm
 
 ## 4. Portal API Service (Go)
 
-Port 8080
-
-Endpoints:
+### Endpoints
 
 1. `GET /api/v1/clients` - List all client identities
 2. `POST /api/v1/clients` - Create new client identity
@@ -81,11 +88,13 @@ Endpoints:
 7. `DELETE /api/v1/clients/:id/disconnect` - Tear down container
 8. `GET /api/v1/clients/:id/status` - Container status
 
+#### Port
+
+8080
+
 ## 5. Terminal Service (Node.Js with Socket.io)
 
-Port 8081
-
-Features:
+[features]
 
 1. WebSocket connection per user session
 2. PTY (pseudo-terminal) allocation
@@ -93,11 +102,15 @@ Features:
 4. Output streaming
 5. Session management
 
+[port]
+
+8081
+
 ## 7. Identity Manager (Vault)
 
 Purpose: Secure credential storage
 
-Storage:
+### Storage
 
 1. Cloud Provider credentials
 2. API Keys
@@ -106,7 +119,7 @@ Storage:
 
 ## 8. Client Containers
 
-Base Images:
+### Base Images
 
 1. Azure: `mcr.microsoft.com/azure-cli`
 2. AWS: `amazon/aws-cli`
