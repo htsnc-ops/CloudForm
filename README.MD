@@ -124,9 +124,11 @@ Automatic cleanup after timeout
 
 ### Creating a New Client Identity
 
-User → Frontend → Portal API → Identity Manager (Vault)
-                             → Container Orchestrator (K8s)
-                             → Database (PostgreSQL)
+                                → Identity Manager (Vault)
+                              /
+User → Frontend → Portal API    → Container Orchestrator (K8s)
+                              \
+                                → Database (PostgreSQL)
 
 1. User submits client form
 2. Portal API validates input
