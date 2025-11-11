@@ -92,3 +92,41 @@ Features:
 3. Command execution in client containers
 4. Output streaming
 5. Session management
+
+## 7. Identity Manager (Vault)
+
+Purpose: Secure credential storage
+
+Storage:
+
+1. Cloud Provider credentials
+2. API Keys
+3. Service Principal Secrets
+4. Encryption keys
+
+## Data Flow
+
+### Creating a New Client Identity
+
+User → Frontend → Portal API → Identity Manager (Vault)
+                             → Container Orchestrator (K8s)
+                             → Database (PostgreSQL)
+
+1. User submits client form
+2. Portal API validates input
+3. Credentials stored in Vault
+4. Container template created in K8s
+5. Database record created
+6. Response sent to frontend
+
+### Connecting to a Client Terminal
+
+User → Frontend → Terminal Service → Container Orchestrator
+                                   → Client Container
+
+1. User selects client
+2. WebSocket connection established
+3. Terminal Service requests container from orchestrator
+4. Container spun up with injected credentials
+5. PTY allocated and connected to WebSocket
+6. User commands streamed bidirectionally
