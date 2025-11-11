@@ -38,8 +38,13 @@
 
 ## 1. Frontend (React)
 
-Purpose: User interface for client selection and terminal interaction.
-Communication: REST API, WebSocket
+### Purpose
+
+User interface for client selection and terminal interaction.
+
+### Communication
+
+REST API, WebSocket
 
 ## 2. API Gateway (NGINX)
 
@@ -56,7 +61,7 @@ Route traffic, SSL Termination, Rate limiting
 
 ## 3. Keycloak (Auth)
 
-[purpose]
+### Purpose
 
 Identity and access management
 
