@@ -104,6 +104,22 @@ Storage:
 3. Service Principal Secrets
 4. Encryption keys
 
+## 8. Client Containers
+
+Base Images:
+
+1. Azure: `mcr.microsoft.com/azure-cli`
+2. AWS: `amazon/aws-cli`
+3. GCP: `google/cloud-sdk`
+
+Features:
+
+Pre-configured cloud CLIs
+Credential injection at runtime
+Isolated network namespace
+Resource limits (CPU/Memory)
+Automatic cleanup after timeout
+
 ## Data Flow
 
 ### Creating a New Client Identity
