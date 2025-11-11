@@ -4,13 +4,13 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: {{ include "cloud-portal.fullname" . }}
+  name: {{ include "cloudform.fullname" . }}
   namespace: {{ .Values.namespace }}
   labels:
-    {{- include "cloud-portal.labels" . | nindent 4 }}
+    {{- include "cloudform.labels" . | nindent 4 }}
 spec:
   groups:
-  - name: cloud-portal.rules
+  - name: cloudform.rules
     interval: 30s
     rules:
     {{- range .Values.monitoring.prometheusRule.rules }}

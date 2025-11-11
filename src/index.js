@@ -112,7 +112,7 @@ const auditLog = async (req, res, next) => {
 async function storeCredentials(clientId, credentials) {
   try {
     const response = await axios.post(
-      `${vaultUrl}/v1/cloud-portal/data/${clientId}`,
+      `${vaultUrl}/v1/cloudform/data/${clientId}`,
       { data: credentials },
       { headers: { 'X-Vault-Token': vaultToken } }
     );
@@ -126,7 +126,7 @@ async function storeCredentials(clientId, credentials) {
 async function getCredentials(clientId) {
   try {
     const response = await axios.get(
-      `${vaultUrl}/v1/cloud-portal/data/${clientId}`,
+      `${vaultUrl}/v1/cloudform/data/${clientId}`,
       { headers: { 'X-Vault-Token': vaultToken } }
     );
     return response.data.data.data;
@@ -139,7 +139,7 @@ async function getCredentials(clientId) {
 async function deleteCredentials(clientId) {
   try {
     await axios.delete(
-      `${vaultUrl}/v1/cloud-portal/data/${clientId}`,
+      `${vaultUrl}/v1/cloudform/data/${clientId}`,
       { headers: { 'X-Vault-Token': vaultToken } }
     );
   } catch (error) {
@@ -168,7 +168,7 @@ async function createClientContainer(client, userId) {
       name: secretName,
       namespace: namespace,
       labels: {
-        'app.kubernetes.io/name': 'cloud-portal',
+        'app.kubernetes.io/name': 'cloudform',
         'app.kubernetes.io/component': 'container-runtime',
         'client-id': client.id,
         'session-id': sessionId
@@ -188,7 +188,7 @@ async function createClientContainer(client, userId) {
       name: podName,
       namespace: namespace,
       labels: {
-        'app.kubernetes.io/name': 'cloud-portal',
+        'app.kubernetes.io/name': 'cloudform',
         'app.kubernetes.io/component': 'container-runtime',
         'client-id': client.id,
         'session-id': sessionId,
@@ -196,7 +196,7 @@ async function createClientContainer(client, userId) {
       }
     },
     spec: {
-      serviceAccountName: 'cloud-portal-client',
+      serviceAccountName: 'cloudform-client',
       securityContext: {
         runAsNonRoot: true,
         runAsUser: 1000,
@@ -392,7 +392,7 @@ app.post('/api/v1/clients', requireRole(['admin']), async (req, res) => {
         name,
         cloudProvider,
         authType,
-        `cloud-portal/${Date.now()}`,
+        `cloudform/${Date.now()}`,
         containerImage,
         JSON.stringify(resourceLimits || {}),
         req.user.sub

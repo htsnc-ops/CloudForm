@@ -2,10 +2,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "cloud-portal.fullname" . }}-config
+  name: {{ include "cloudform.fullname" . }}-config
   namespace: {{ .Values.namespace }}
   labels:
-    {{- include "cloud-portal.labels" . | nindent 4 }}
+    {{- include "cloudform.labels" . | nindent 4 }}
 data:
   container-images.json: |
     {

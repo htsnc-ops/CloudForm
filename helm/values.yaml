@@ -1,19 +1,19 @@
 ---
 # Global settings
 global:
-  domain: portal.example.com
+  domain: cloudform.example.com
   storageClass: standard
   imagePullSecrets: []
 
 # Namespace
-namespace: cloud-portal
+namespace: htsnc-cloud
 
 # Portal API Service
 portalApi:
   enabled: true
   replicaCount: 2
   image:
-    repository: your-registry/cloud-portal-api
+    repository: your-registry/cloudform-api
     tag: 1.0.0
     pullPolicy: IfNotPresent
   
@@ -41,7 +41,7 @@ portalApi:
     logLevel: info
     sessionTimeout: 3600
     maxContainersPerUser: 5
-    containerNamespace: cloud-portal-containers
+    containerNamespace: cloudform-containers
   
   livenessProbe:
     httpGet:
@@ -66,7 +66,7 @@ terminalService:
   enabled: true
   replicaCount: 2
   image:
-    repository: your-registry/cloud-portal-terminal
+    repository: your-registry/cloudform-terminal
     tag: 1.0.0
     pullPolicy: IfNotPresent
   
@@ -100,7 +100,7 @@ frontend:
   enabled: true
   replicaCount: 2
   image:
-    repository: your-registry/cloud-portal-frontend
+    repository: your-registry/cloudform-frontend
     tag: 1.0.0
     pullPolicy: IfNotPresent
   
@@ -123,7 +123,7 @@ frontend:
 
 # Container Settings
 containers:
-  namespace: cloud-portal-containers
+  namespace: cloudform-containers
   images:
     azure: mcr.microsoft.com/azure-cli:latest
     aws: amazon/aws-cli:latest
@@ -153,11 +153,11 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
   
   hosts:
-    - host: portal.example.com
+    - host: cloudform.example.com
       paths:
         - path: /api
           pathType: Prefix
-          backend: portal-api
+          backend: cloudform-api
         - path: /ws
           pathType: Prefix
           backend: terminal-service
@@ -169,9 +169,9 @@ ingress:
           backend: frontend
   
   tls:
-    - secretName: cloud-portal-tls
+    - secretName: cloudform-tls
       hosts:
-        - portal.example.com
+        - cloudform.example.com
 
 # Keycloak (Auth)
 keycloak:
@@ -268,7 +268,7 @@ rbac:
   # Service Account for Portal API
   portalApi:
     create: true
-    name: portal-api-sa
+    name: cloudform-api-sa
     annotations: {}
   
   # Service Account for Terminal Service
@@ -280,7 +280,7 @@ rbac:
   # Service Account for Client Containers
   clientContainers:
     create: true
-    name: cloud-portal-client
+    name: cloudform-client
     annotations: {}
 
 # Network Policies

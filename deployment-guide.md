@@ -45,8 +45,8 @@ spec:
           class: nginx
 EOF
 3. Create Namespace
-bashkubectl create namespace cloud-portal
-kubectl create namespace cloud-portal-containers
+bashkubectl create namespace htsnc-cloud
+kubectl create namespace htsnc-cloud
 4. Configure Values
 Create a custom values file for your environment:
 bash# Copy and edit values
@@ -67,18 +67,17 @@ postgresql:
     password: <strong-password>  # Change this
 5. Install Cloud Portal
 bash# Install with Helm
-helm install cloud-portal ./cloud-portal \
-  --namespace cloud-portal \
-  --values my-values.yaml \
+helm install cloudform ./helm \
+  --namespace htsnc-cloud \
+  --values values.yaml \
   --wait \
   --timeout 10m
 
 # Verify installation
-kubectl get pods -n cloud-portal
-kubectl get pods -n cloud-portal-containers
+kubectl get pods -n htsnc-cloud
 6. Configure Keycloak
 bash# Port-forward to Keycloak
-kubectl port-forward -n cloud-portal svc/cloud-portal-keycloak 8080:8080
+kubectl port-forward -n htsnc-cloud svc/cloudform-keycloak 8080:8080
 
 # Access Keycloak admin console
 # URL: http://localhost:8080
@@ -86,8 +85,8 @@ kubectl port-forward -n cloud-portal svc/cloud-portal-keycloak 8080:8080
 # Password: (from values.yaml)
 Keycloak Configuration:
 
-Create a new realm called cloud-portal
-Create a client called portal-api:
+Create a new realm called cloudform
+Create a client called cloudform-api:
 
 Client Protocol: openid-connect
 Access Type: confidential
@@ -107,7 +106,7 @@ Create users and assign roles
 
 7. Configure Vault
 bash# Port-forward to Vault
-kubectl port-forward -n cloud-portal svc/cloud-portal-vault 8200:8200
+kubectl port-forward -n htsnc-cloud svc/cloudform-vault 8200:8200
 
 # Initialize Vault
 export VAULT_ADDR='http://localhost:8200'
@@ -124,42 +123,42 @@ vault operator unseal <key-3>
 vault login <root-token>
 
 # Enable KV secrets engine
-vault secrets enable -path=cloud-portal kv-v2
+vault secrets enable -path=cloudform kv-v2
 
 # Create policy for Portal API
-vault policy write cloud-portal-api - <<EOF
-path "cloud-portal/data/*" {
+vault policy write cloudform-api - <<EOF
+path "cloudform/data/*" {
   capabilities = ["create", "read", "update", "delete", "list"]
 }
 EOF
 
 # Create token for Portal API
-vault token create -policy=cloud-portal-api
+vault token create -policy=cloudform-api
 8. Update Secrets with Real Values
 bash# Update Portal API secrets
-kubectl create secret generic cloud-portal-secrets \
-  --from-literal=database-url="postgresql://cloudportal:<password>@cloud-portal-postgresql:5432/cloudportal" \
+kubectl create secret generic cloudform-secrets \
+  --from-literal=database-url="postgresql://cloudportal:<password>@cloudform-postgresql:5432/cloudportal" \
   --from-literal=keycloak-client-secret="<client-secret-from-keycloak>" \
   --from-literal=vault-token="<vault-token>" \
-  --namespace cloud-portal \
+  --namespace htsnc-cloud \
   --dry-run=client -o yaml | kubectl apply -f -
 9. Verify Deployment
 bash# Check all pods are running
-kubectl get pods -n cloud-portal
-kubectl get pods -n cloud-portal-containers
+kubectl get pods -n htsnc-cloud
+kubectl get pods -n htsnc-cloud
 
 # Check ingress
-kubectl get ingress -n cloud-portal
+kubectl get ingress -n htsnc-cloud
 
 # Check services
-kubectl get svc -n cloud-portal
+kubectl get svc -n htsnc-cloud
 
 # View logs
-kubectl logs -n cloud-portal deployment/cloud-portal-api
-kubectl logs -n cloud-portal deployment/cloud-portal-terminal
+kubectl logs -n htsnc-cloud deployment/cloudform-api
+kubectl logs -n htsnc-cloud deployment/cloudform-terminal
 10. Access the Portal
 bash# Get the external IP
-kubectl get ingress -n cloud-portal
+kubectl get ingress -n htsnc-cloud
 
 # Access the portal
 # https://your-portal.example.com
@@ -189,10 +188,10 @@ EXPOSE 8080
 CMD ["node", "src/index.js"]
 Build and Push:
 bash# Build
-docker build -f Dockerfile.api -t your-registry/cloud-portal-api:1.0.0 .
+docker build -f Dockerfile.api -t your-registry/cloudform-api:1.0.0 .
 
 # Push
-docker push your-registry/cloud-portal-api:1.0.0
+docker push your-registry/cloudform-api:1.0.0
 Terminal Service (Node.js Example)
 dockerfile# Dockerfile.terminal
 FROM node:18-alpine
@@ -263,13 +262,13 @@ server {
     }
 
     location /api {
-        proxy_pass http://cloud-portal-api:8080;
+        proxy_pass http://cloudform-api:8080;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
 
     location /ws {
-        proxy_pass http://cloud-portal-terminal:8081;
+        proxy_pass http://cloudform-terminal:8081;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -281,87 +280,87 @@ bash# Pull latest chart changes
 git pull
 
 # Update dependencies
-helm dependency update ./cloud-portal
+helm dependency update ./cloudform
 
 # Upgrade installation
-helm upgrade cloud-portal ./cloud-portal \
-  --namespace cloud-portal \
+helm upgrade cloudform ./cloudform \
+  --namespace htsnc-cloud \
   --values my-values.yaml \
   --wait
 
 # Verify upgrade
-kubectl rollout status deployment/cloud-portal-api -n cloud-portal
-kubectl rollout status deployment/cloud-portal-terminal -n cloud-portal
+kubectl rollout status deployment/cloudform-api -n htsnc-cloud
+kubectl rollout status deployment/cloudform-terminal -n htsnc-cloud
 Rollback
 bash# List releases
-helm history cloud-portal -n cloud-portal
+helm history cloudform -n htsnc-cloud
 
 # Rollback to previous version
-helm rollback cloud-portal -n cloud-portal
+helm rollback cloudform -n htsnc-cloud
 
 # Rollback to specific version
-helm rollback cloud-portal 2 -n cloud-portal
+helm rollback cloudform 2 -n htsnc-cloud
 Backup & Restore
 Backup Database
 bash# Backup PostgreSQL
-kubectl exec -n cloud-portal cloud-portal-postgresql-0 -- \
+kubectl exec -n htsnc-cloud cloudform-postgresql-0 -- \
   pg_dump -U cloudportal cloudportal | gzip > backup-$(date +%Y%m%d).sql.gz
 
 # Backup Vault data
-kubectl cp cloud-portal/cloud-portal-vault-0:/vault/data ./vault-backup-$(date +%Y%m%d)
+kubectl cp cloudform/cloudform-vault-0:/vault/data ./vault-backup-$(date +%Y%m%d)
 Restore Database
 bash# Restore PostgreSQL
 gunzip < backup-20251110.sql.gz | \
-  kubectl exec -i -n cloud-portal cloud-portal-postgresql-0 -- \
+  kubectl exec -i -n htsnc-cloud cloudform-postgresql-0 -- \
   psql -U cloudportal cloudportal
 
 # Restore Vault
-kubectl cp ./vault-backup-20251110 cloud-portal/cloud-portal-vault-0:/vault/data
-kubectl rollout restart statefulset/cloud-portal-vault -n cloud-portal
+kubectl cp ./vault-backup-20251110 cloudform/cloudform-vault-0:/vault/data
+kubectl rollout restart statefulset/cloudform-vault -n htsnc-cloud
 Troubleshooting
 Check Logs
 bash# API logs
-kubectl logs -f -n cloud-portal deployment/cloud-portal-api
+kubectl logs -f -n htsnc-cloud deployment/cloudform-api
 
 # Terminal service logs
-kubectl logs -f -n cloud-portal deployment/cloud-portal-terminal
+kubectl logs -f -n htsnc-cloud deployment/cloudform-terminal
 
 # Frontend logs
-kubectl logs -f -n cloud-portal deployment/cloud-portal-frontend
+kubectl logs -f -n htsnc-cloud deployment/cloudform-frontend
 
 # Container logs
-kubectl logs -f -n cloud-portal-containers <pod-name>
+kubectl logs -f -n htsnc-cloud <pod-name>
 Common Issues
 Pods not starting:
 bash# Check events
-kubectl describe pod <pod-name> -n cloud-portal
+kubectl describe pod <pod-name> -n htsnc-cloud
 
 # Check resource quotas
-kubectl describe resourcequota -n cloud-portal-containers
+kubectl describe resourcequota -n htsnc-cloud
 Database connection issues:
 bash# Test connection from API pod
-kubectl exec -it -n cloud-portal deployment/cloud-portal-api -- \
+kubectl exec -it -n htsnc-cloud deployment/cloudform-api -- \
   /bin/sh -c 'apk add postgresql-client && psql $DATABASE_URL'
 WebSocket connection failing:
 bash# Check ingress annotations
-kubectl describe ingress cloud-portal -n cloud-portal
+kubectl describe ingress cloudform -n htsnc-cloud
 
 # Verify terminal service is running
-kubectl get pods -n cloud-portal -l app.kubernetes.io/component=terminal
+kubectl get pods -n htsnc-cloud -l app.kubernetes.io/component=terminal
 Container creation failing:
 bash# Check RBAC permissions
-kubectl auth can-i create pods --namespace cloud-portal-containers --as system:serviceaccount:cloud-portal:portal-api-sa
+kubectl auth can-i create pods --namespace htsnc-cloud --as system:serviceaccount:cloudform:cloudform-api-sa
 
 # Check resource quotas
-kubectl describe resourcequota -n cloud-portal-containers
+kubectl describe resourcequota -n htsnc-cloud
 Monitoring
 View Metrics
 bash# API metrics
-kubectl port-forward -n cloud-portal svc/cloud-portal-api 8080:8080
+kubectl port-forward -n htsnc-cloud svc/cloudform-api 8080:8080
 curl http://localhost:8080/metrics
 
 # Terminal metrics
-kubectl port-forward -n cloud-portal svc/cloud-portal-terminal 8081:8081
+kubectl port-forward -n htsnc-cloud svc/cloudform-terminal 8081:8081
 curl http://localhost:8081/metrics
 Prometheus Queries
 promql# Active containers
@@ -378,13 +377,13 @@ cloudportal_websocket_connections
 Scaling
 Manual Scaling
 bash# Scale API
-kubectl scale deployment cloud-portal-api -n cloud-portal --replicas=5
+kubectl scale deployment cloudform-api -n htsnc-cloud --replicas=5
 
 # Scale Terminal Service
-kubectl scale deployment cloud-portal-terminal -n cloud-portal --replicas=5
+kubectl scale deployment cloudform-terminal -n htsnc-cloud --replicas=5
 Configure HPA
 Already configured in values.yaml. Verify:
-bashkubectl get hpa -n cloud-portal
+bashkubectl get hpa -n htsnc-cloud
 Security Considerations
 SSL/TLS
 
@@ -442,11 +441,11 @@ portalApi:
     targetCPUUtilizationPercentage: 60  # Scale earlier
 Uninstall
 bash# Uninstall Helm release
-helm uninstall cloud-portal -n cloud-portal
+helm uninstall cloudform -n htsnc-cloud
 
 # Delete namespaces
-kubectl delete namespace cloud-portal
-kubectl delete namespace cloud-portal-containers
+kubectl delete namespace htsnc-cloud
+kubectl delete namespace htsnc-cloud
 
 # Clean up CRDs if needed
 kubectl delete crd <cert-manager-crds>
@@ -460,8 +459,8 @@ minikube addons enable ingress
 minikube addons enable metrics-server
 
 # Install with dev values
-helm install cloud-portal ./cloud-portal \
-  --namespace cloud-portal \
+helm install cloudform ./cloudform \
+  --namespace htsnc-cloud \
   --create-namespace \
   --values values-dev.yaml
 
@@ -500,14 +499,14 @@ jobs:
     
     - name: Deploy
       run: |
-        helm upgrade --install cloud-portal ./cloud-portal \
-          --namespace cloud-portal \
+        helm upgrade --install cloudform ./cloudform \
+          --namespace htsnc-cloud \
           --values values-prod.yaml \
           --set portalApi.image.tag=${{ github.sha }} \
           --wait
 Support
 For issues and questions:
 
-GitHub Issues: https://github.com/your-org/cloud-portal/issues
-Documentation: https://docs.example.com/cloud-portal
+GitHub Issues: https://github.com/your-org/cloudform/issues
+Documentation: https://docs.example.com/cloudform
 Email: support@example.com

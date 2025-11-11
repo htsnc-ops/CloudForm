@@ -4,14 +4,14 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "cloud-portal.fullname" . }}-api
+  name: {{ include "cloudform.fullname" . }}-api
   namespace: {{ .Values.namespace }}
   labels:
-    {{- include "cloud-portal.labels" . | nindent 4 }}
+    {{- include "cloudform.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      {{- include "cloud-portal.selectorLabels" . | nindent 6 }}
+      {{- include "cloudform.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: api
   endpoints:
   - port: http
@@ -21,14 +21,14 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "cloud-portal.fullname" . }}-terminal
+  name: {{ include "cloudform.fullname" . }}-terminal
   namespace: {{ .Values.namespace }}
   labels:
-    {{- include "cloud-portal.labels" . | nindent 4 }}
+    {{- include "cloudform.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      {{- include "cloud-portal.selectorLabels" . | nindent 6 }}
+      {{- include "cloudform.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: terminal
   endpoints:
   - port: ws

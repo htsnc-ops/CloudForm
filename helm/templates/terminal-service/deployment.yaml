@@ -2,10 +2,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "cloud-portal.fullname" . }}-terminal
+  name: {{ include "cloudform.fullname" . }}-terminal
   namespace: {{ .Values.namespace }}
   labels:
-    {{- include "cloud-portal.labels" . | nindent 4 }}
+    {{- include "cloudform.labels" . | nindent 4 }}
     app.kubernetes.io/component: terminal
 spec:
   {{- if not .Values.terminalService.autoscaling.enabled }}
@@ -13,12 +13,12 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "cloud-portal.selectorLabels" . | nindent 6 }}
+      {{- include "cloudform.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: terminal
   template:
     metadata:
       labels:
-        {{- include "cloud-portal.selectorLabels" . | nindent 8 }}
+        {{- include "cloudform.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: terminal
     spec:
       {{- with .Values.global.imagePullSecrets }}
@@ -58,7 +58,7 @@ spec:
         - name: CONTAINER_NAMESPACE
           value: "{{ .Values.containers.namespace }}"
         - name: JWT_PUBLIC_KEY_URL
-          value: "http://{{ .Release.Name }}-keycloak:8080/realms/cloud-portal/protocol/openid-connect/certs"
+          value: "http://{{ .Release.Name }}-keycloak:8080/realms/cloudform/protocol/openid-connect/certs"
         resources:
           {{- toYaml .Values.terminalService.resources | nindent 10 }}
         volumeMounts:

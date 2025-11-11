@@ -4,10 +4,10 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ include "cloud-portal.fullname" . }}-api
+  name: {{ include "cloudform.fullname" . }}-api
   namespace: {{ .Values.namespace }}
   labels:
-    {{- include "cloud-portal.labels" . | nindent 4 }}
+    {{- include "cloudform.labels" . | nindent 4 }}
 rules:
 - apiGroups: [""]
   resources: ["secrets", "configmaps"]
@@ -20,10 +20,10 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ include "cloud-portal.fullname" . }}-api-containers
+  name: {{ include "cloudform.fullname" . }}-api-containers
   namespace: {{ .Values.containers.namespace }}
   labels:
-    {{- include "cloud-portal.labels" . | nindent 4 }}
+    {{- include "cloudform.labels" . | nindent 4 }}
 rules:
 - apiGroups: [""]
   resources: ["pods", "pods/log", "pods/exec"]
@@ -42,10 +42,10 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ include "cloud-portal.fullname" . }}-terminal-containers
+  name: {{ include "cloudform.fullname" . }}-terminal-containers
   namespace: {{ .Values.containers.namespace }}
   labels:
-    {{- include "cloud-portal.labels" . | nindent 4 }}
+    {{- include "cloudform.labels" . | nindent 4 }}
 rules:
 - apiGroups: [""]
   resources: ["pods", "pods/log"]

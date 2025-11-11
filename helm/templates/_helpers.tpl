@@ -3,14 +3,14 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "cloud-portal.name" -}}
+{{- define "cloudform.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Create a default fully qualified app name.
 */}}
-{{- define "cloud-portal.fullname" -}}
+{{- define "cloudform.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ Create a default fully qualified app name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "cloud-portal.chart" -}}
+{{- define "cloudform.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "cloud-portal.labels" -}}
-helm.sh/chart: {{ include "cloud-portal.chart" . }}
-{{ include "cloud-portal.selectorLabels" . }}
+{{- define "cloudform.labels" -}}
+helm.sh/chart: {{ include "cloudform.chart" . }}
+{{ include "cloudform.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,7 +45,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "cloud-portal.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "cloud-portal.name" . }}
+{{- define "cloudform.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "cloudform.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}

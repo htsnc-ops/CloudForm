@@ -2,10 +2,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "cloud-portal.fullname" . }}-api
+  name: {{ include "cloudform.fullname" . }}-api
   namespace: {{ .Values.namespace }}
   labels:
-    {{- include "cloud-portal.labels" . | nindent 4 }}
+    {{- include "cloudform.labels" . | nindent 4 }}
     app.kubernetes.io/component: api
 spec:
   {{- if not .Values.portalApi.autoscaling.enabled }}
@@ -13,12 +13,12 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "cloud-portal.selectorLabels" . | nindent 6 }}
+      {{- include "cloudform.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: api
   template:
     metadata:
       labels:
-        {{- include "cloud-portal.selectorLabels" . | nindent 8 }}
+        {{- include "cloudform.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: api
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
@@ -54,25 +54,25 @@ spec:
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
-              name: {{ include "cloud-portal.fullname" . }}-secrets
+              name: {{ include "cloudform.fullname" . }}-secrets
               key: database-url
         - name: KEYCLOAK_URL
           value: "http://{{ .Release.Name }}-keycloak:{{ .Values.keycloak.service.port }}"
         - name: KEYCLOAK_REALM
-          value: "cloud-portal"
+          value: "cloudform"
         - name: KEYCLOAK_CLIENT_ID
-          value: "portal-api"
+          value: "cloudform-api"
         - name: KEYCLOAK_CLIENT_SECRET
           valueFrom:
             secretKeyRef:
-              name: {{ include "cloud-portal.fullname" . }}-secrets
+              name: {{ include "cloudform.fullname" . }}-secrets
               key: keycloak-client-secret
         - name: VAULT_ADDR
           value: "http://{{ .Release.Name }}-vault:8200"
         - name: VAULT_TOKEN
           valueFrom:
             secretKeyRef:
-              name: {{ include "cloud-portal.fullname" . }}-secrets
+              name: {{ include "cloudform.fullname" . }}-secrets
               key: vault-token
         livenessProbe:
           {{- toYaml .Values.portalApi.livenessProbe | nindent 10 }}

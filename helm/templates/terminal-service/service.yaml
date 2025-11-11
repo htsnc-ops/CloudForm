@@ -2,10 +2,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "cloud-portal.fullname" . }}-terminal
+  name: {{ include "cloudform.fullname" . }}-terminal
   namespace: {{ .Values.namespace }}
   labels:
-    {{- include "cloud-portal.labels" . | nindent 4 }}
+    {{- include "cloudform.labels" . | nindent 4 }}
     app.kubernetes.io/component: terminal
 spec:
   type: {{ .Values.terminalService.service.type }}
@@ -15,5 +15,5 @@ spec:
     protocol: TCP
     name: ws
   selector:
-    {{- include "cloud-portal.selectorLabels" . | nindent 4 }}
+    {{- include "cloudform.selectorLabels" . | nindent 4 }}
     app.kubernetes.io/component: terminal

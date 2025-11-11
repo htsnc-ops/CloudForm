@@ -74,7 +74,7 @@ Identity and access management
 ### Realms
 
 1. `master`: Admin realm
-2. `cloud-portal`: Application realm
+2. `cloudform`: Application realm
 
 ## 4. Portal API Service (Go)
 
@@ -260,13 +260,13 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: client-{{client-id}}-{{session-id}}
-  namespace: cloud-portal-containers
+  namespace: htsnc-cloud
   labels:
-    app: cloud-portal
+    app: cloudform
     client-id: {{client-id}}
     session-id: {{session-id}}
 spec:
-  serviceAccountName: cloud-portal-client
+  serviceAccountName: cloudform-client
   securityContext:
     runAsNonRoot: true
     runAsUser: 1000
@@ -323,19 +323,19 @@ DATABASE_POOL_SIZE=10
 
 # Keycloak
 KEYCLOAK_URL=http://keycloak:8080
-KEYCLOAK_REALM=cloud-portal
-KEYCLOAK_CLIENT_ID=portal-api
+KEYCLOAK_REALM=cloudform
+KEYCLOAK_CLIENT_ID=cloudform-api
 KEYCLOAK_CLIENT_SECRET=<secret>
 
 # Vault
 VAULT_ADDR=http://vault:8200
 VAULT_TOKEN=<token>
-VAULT_MOUNT_PATH=cloud-portal
+VAULT_MOUNT_PATH=cloudform
 
 # Kubernetes
 KUBERNETES_SERVICE_HOST=kubernetes.default.svc
 KUBERNETES_SERVICE_PORT=443
-CONTAINER_NAMESPACE=cloud-portal-containers
+CONTAINER_NAMESPACE=cloudform-containers
 
 # Application
 PORT=8080
@@ -358,7 +358,7 @@ KUBERNETES_SERVICE_HOST=kubernetes.default.svc
 KUBERNETES_SERVICE_PORT=443
 
 # Authentication
-JWT_PUBLIC_KEY_URL=http://keycloak:8080/realms/cloud-portal/protocol/openid-connect/certs
+JWT_PUBLIC_KEY_URL=http://keycloak:8080/realms/cloudform/protocol/openid-connect/certs
 
 # Application
 LOG_LEVEL=info
@@ -496,12 +496,12 @@ yaml
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: portal-api-hpa
+  name: cloudform-api-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: portal-api
+    name: cloudform-api
   minReplicas: 2
   maxReplicas: 10
   metrics:

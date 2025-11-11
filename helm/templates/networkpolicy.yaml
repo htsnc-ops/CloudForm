@@ -4,14 +4,14 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ include "cloud-portal.fullname" . }}-api
+  name: {{ include "cloudform.fullname" . }}-api
   namespace: {{ .Values.namespace }}
   labels:
-    {{- include "cloud-portal.labels" . | nindent 4 }}
+    {{- include "cloudform.labels" . | nindent 4 }}
 spec:
   podSelector:
     matchLabels:
-      {{- include "cloud-portal.selectorLabels" . | nindent 6 }}
+      {{- include "cloudform.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: api
   policyTypes:
     - Ingress
@@ -60,14 +60,14 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ include "cloud-portal.fullname" . }}-terminal
+  name: {{ include "cloudform.fullname" . }}-terminal
   namespace: {{ .Values.namespace }}
   labels:
-    {{- include "cloud-portal.labels" . | nindent 4 }}
+    {{- include "cloudform.labels" . | nindent 4 }}
 spec:
   podSelector:
     matchLabels:
-      {{- include "cloud-portal.selectorLabels" . | nindent 6 }}
+      {{- include "cloudform.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: terminal
   policyTypes:
     - Ingress
@@ -111,14 +111,14 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ include "cloud-portal.fullname" . }}-frontend
+  name: {{ include "cloudform.fullname" . }}-frontend
   namespace: {{ .Values.namespace }}
   labels:
-    {{- include "cloud-portal.labels" . | nindent 4 }}
+    {{- include "cloudform.labels" . | nindent 4 }}
 spec:
   podSelector:
     matchLabels:
-      {{- include "cloud-portal.selectorLabels" . | nindent 6 }}
+      {{- include "cloudform.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: frontend
   policyTypes:
     - Ingress
@@ -138,14 +138,14 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ include "cloud-portal.fullname" . }}-containers
+  name: {{ include "cloudform.fullname" . }}-containers
   namespace: {{ .Values.containers.namespace }}
   labels:
-    {{- include "cloud-portal.labels" . | nindent 4 }}
+    {{- include "cloudform.labels" . | nindent 4 }}
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "cloud-portal.name" . }}
+      app.kubernetes.io/name: {{ include "cloudform.name" . }}
       app.kubernetes.io/component: container-runtime
   policyTypes:
     - Ingress
