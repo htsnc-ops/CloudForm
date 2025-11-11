@@ -5,7 +5,7 @@
 # This script checks if all required infrastructure components are present
 ################################################################################
 
-set -e
+# set -e
 
 # Colors for output
 RED='\033[0;31m'
@@ -58,18 +58,19 @@ print_section "1. Kubernetes Cluster Access"
 
 if command -v kubectl &> /dev/null; then
     print_status "PASS" "kubectl is installed"
-    KUBECTL_VERSION=$(kubectl version --client -o json 2>/dev/null | grep -o '"gitVersion":"[^"]*"' | cut -d'"' -f4)
-    print_status "INFO" "kubectl version: $KUBECTL_VERSION"
+    KUBECTL_VERSION=$(kubectl version -o json 2>/dev/null | grep -o '"gitVersion": *"[^"]*"' | head -1 | cut -d'"' -f4)
+    print_status "INFO" "kubectl version:" 
+    echo $KUBECTL_VERSION
 else
     print_status "FAIL" "kubectl is not installed"
     echo "  Install: https://kubernetes.io/docs/tasks/tools/"
 fi
 
 if kubectl cluster-info &> /dev/null; then
-    print_status "PASS" "Can connect to Kubernetes cluster"
+#     print_status "PASS" "Can connect to Kubernetes cluster"
     
     # Get cluster info
-    CLUSTER_VERSION=$(kubectl version -o json 2>/dev/null | grep -o '"serverVersion":{[^}]*}' | grep -o '"gitVersion":"[^"]*"' | cut -d'"' -f4)
+    CLUSTER_VERSION=$(kubectl version -o json 2>/dev/null | grep -A7 '"serverVersion"' | grep -o '"gitVersion": *"[^"]*"' | cut -d'"' -f4)
     print_status "INFO" "Cluster version: $CLUSTER_VERSION"
     
     # Check version compatibility (needs 1.24+)
@@ -112,22 +113,26 @@ kubectl get nodes -o custom-columns=NAME:.metadata.name,STATUS:.status.condition
 # Check node resources
 echo ""
 print_status "INFO" "Checking node resources..."
-TOTAL_CPU=$(kubectl get nodes -o json | grep -o '"cpu":"[^"]*"' | grep -o '[0-9]*' | awk '{s+=$1} END {print s}')
-TOTAL_MEMORY=$(kubectl get nodes -o json | grep -o '"memory":"[^"]*Ki"' | grep -o '[0-9]*' | awk '{s+=$1} END {printf "%.0f", s/1024/1024}')
+TOTAL_CPU_CAPACITY=$(kubectl get nodes -o json | jq -r '.items[].status.capacity.cpu')
+TOTAL_ALLOCATABLE_CPU=$(kubectl get nodes -o json | jq -r '.items[].status.allocatable.cpu')
+TOTAL_ALLOCATABLE_MEMORY=$(kubectl get nodes -o json | jq -r '.items[].status.allocatable.memory' | awk '{s+=$1} END {printf "%.0f\n", s/1024/1024}')
+TOTAL_MEMORY_CAPACITY=$(kubectl get nodes -o json | jq -r '.items[].status.capacity.memory' | awk '{s+=$1} END {printf "%.0f\n", s/1024/1024}')
 
-print_status "INFO" "Total cluster CPU: ${TOTAL_CPU} cores"
-print_status "INFO" "Total cluster Memory: ${TOTAL_MEMORY} GB"
+print_status "INFO" "Total cluster CPU Capacity: ${TOTAL_CPU_CAPACITY} cores"
+print_status "INFO" "Total cluster Allocatable CPU: ${TOTAL_ALLOCATABLE_CPU} cores"
+print_status "INFO" "Total cluster Memory: ${TOTAL_MEMORY_CAPACITY} GB"
+print_status "INFO" "Total cluster Allocatable Memory: ${TOTAL_ALLOCATABLE_MEMORY} GB"
 
-if [ "$TOTAL_CPU" -ge 8 ]; then
+if [ "$TOTAL_ALLOCATABLE_CPU" -ge 8 ]; then
     print_status "PASS" "Sufficient CPU resources (8+ cores recommended)"
 else
-    print_status "WARN" "Low CPU resources: ${TOTAL_CPU} cores (8+ recommended)"
+    print_status "WARN" "Low CPU resources: ${TOTAL_ALLOCATABLE_CPU} cores (8+ recommended)"
 fi
 
-if [ "$TOTAL_MEMORY" -ge 16 ]; then
+if [ "$TOTAL_ALLOCATABLE_MEMORY" -ge 16 ]; then
     print_status "PASS" "Sufficient memory resources (16+ GB recommended)"
 else
-    print_status "WARN" "Low memory resources: ${TOTAL_MEMORY} GB (16+ GB recommended)"
+    print_status "WARN" "Low memory resources: ${TOTAL_ALLOCATABLE_MEMORY} GB (16+ GB recommended)"
 fi
 
 ################################################################################
@@ -333,8 +338,8 @@ check_or_create_namespace() {
     fi
 }
 
-check_or_create_namespace "cloud-portal"
-check_or_create_namespace "cloud-portal-containers"
+check_or_create_namespace "cloudform"
+check_or_create_namespace "cloudform-containers"
 
 ################################################################################
 # 9. Check Network Policies Support
@@ -409,7 +414,7 @@ if [ $FAILED -eq 0 ]; then
     echo "Next steps:"
     echo "  1. Review any warnings above"
     echo "  2. Proceed with Cloud Portal installation"
-    echo "  3. Run: helm install cloud-portal ./cloud-portal --namespace cloud-portal --create-namespace"
+    echo "  3. Run: helm install cloudform helm --namespace cloudform --create-namespace"
     exit 0
 elif [ $FAILED -le 2 ]; then
     echo -e "${YELLOW}⚠ Your cluster is mostly ready but has some issues${NC}"
