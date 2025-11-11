@@ -396,6 +396,63 @@ else
 fi
 
 ################################################################################
+# 11. Ensure Proper Helm Repositories
+################################################################################
+
+print_section "11. Ensure Helm Repositories"
+
+# Define required repos
+REPOS='[{"name":"hashicorp","url":"https://helm.releases.hashicorp.com"},{"name":"bitnami","url":"https://charts.bitnami.com/bitnami"},{"name":"prometheus-community","url":"https://prometheus-community.github.io/helm-charts"}]'
+
+# Loop through each repo
+echo "$REPOS" | jq -c '.[]' | while read -r repo; do
+    name=$(echo "$repo" | jq -r '.name')
+    url=$(echo "$repo" | jq -r '.url')
+    
+    # Check if repo is already added
+    if helm repo list | awk '{print $1}' | grep -qx "$name"; then
+        print_status "INFO" "Helm repo '$name' already exists"
+    else
+        print_status "INFO" "Adding Helm repo '$name'"
+        if helm repo add "$name" "$url"; then
+            print_status "PASS" "Added Helm repo '$name'"
+        else
+            print_status "FAIL" "Failed to add Helm repo '$name'"
+        fi
+    fi
+done
+
+# Update repos
+print_status "INFO" "Updating Helm repositories..."
+helm repo update
+
+# -------------------------------
+# Ensure Prometheus Operator CRDs
+# -------------------------------
+# Check if PrometheusRule CRD exists
+if kubectl get crd prometheusrules.monitoring.coreos.com &>/dev/null; then
+    print_status "INFO" "Prometheus Operator CRDs already installed"
+else
+    print_status "INFO" "Installing Prometheus Operator CRDs via Helm"
+    
+    # Create a namespace for Prometheus Operator if it doesn't exist
+    if ! kubectl get ns monitoring &>/dev/null; then
+        kubectl create ns monitoring
+    fi
+
+    # Install kube-prometheus-stack (Prometheus Operator) in the monitoring namespace
+    if helm upgrade --install prometheus-operator prometheus-community/kube-prometheus-stack \
+        --namespace monitoring \
+        --create-namespace \
+        --set prometheusOperator.createCustomResource=true \
+        --wait; then
+        print_status "PASS" "Prometheus Operator installed successfully"
+    else
+        print_status "FAIL" "Failed to install Prometheus Operator"
+    fi
+fi
+
+################################################################################
 # Summary
 ################################################################################
 

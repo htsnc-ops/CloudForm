@@ -343,3 +343,6 @@ persistence:
   storageClass: standard
   accessMode: ReadWriteOnce
   size: 10Gi
+
+
+## Add support for configfiles
