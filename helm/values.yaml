@@ -6,7 +6,7 @@ global:
   imagePullSecrets: []
 
 # Namespace
-namespace: htsnc
+namespace: harbortech
 
 # Portal API Service
 portalApi:
