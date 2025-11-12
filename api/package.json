@@ -4,19 +4,19 @@
     "description": "Cloud Portal API Service",
     "main": "src/index.js",
     "scripts": {
-      "start": "node src/index.js",
-      "dev": "nodemon src/index.js"
+        "start": "node src/index.js",
+        "dev": "nodemon src/index.js"
     },
     "dependencies": {
-      "express": "^4.18.2",
-      "pg": "^8.11.3",
-      "@kubernetes/client-node": "^0.20.0",
-      "jsonwebtoken": "^9.0.2",
-      "jwks-rsa": "^3.1.0",
-      "axios": "^1.6.2",
-      "cors": "^2.8.5"
+        "@kubernetes/client-node": "^1.4.0",
+        "axios": "^1.6.2",
+        "cors": "^2.8.5",
+        "express": "^4.18.2",
+        "jsonwebtoken": "^9.0.2",
+        "jwks-rsa": "^3.1.0",
+        "pg": "^8.11.3"
     },
     "devDependencies": {
-      "nodemon": "^3.0.2"
+        "nodemon": "^3.0.2"
     }
-  }
+}

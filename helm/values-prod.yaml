@@ -1,6 +1,6 @@
 ---
 global:
-  domain: portal.example.com
+  domain: cloudform.example.com
 
 portalApi:
   replicaCount: 3
