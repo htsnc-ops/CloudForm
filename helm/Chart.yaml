@@ -28,15 +28,4 @@ dependencies:
     version: "13.x.x"
     repository: "file://postgresql"
     condition: postgresql.enabled
-  - name: frontend
-    version: "1.0.1"
-    repository: "file://templates/frontend"
-    condition: frontend.enabled
-  - name: portalApi
-    version: "1.0.1"
-    repository: "file://templates/portal-api"
-    condition: portalApi.enabled
-  - name: terminal-service
-    version: "1.0.1"
-    repository: "file://templates/terminal-service"
-    condition: terminal-service.enabled
+    
