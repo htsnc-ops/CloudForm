@@ -5,17 +5,19 @@
 # Stage 1: Build React app
 FROM node:18-alpine AS builder
 
-WORKDIR /app/frontend
+WORKDIR /app
 
 # Copy package files
 COPY frontend/package*.json ./
+COPY frontend/nginx.conf ./
 
 # Install dependencies
-RUN npm ci && \
+RUN npm install && \
     npm cache clean --force
 
-# Copy source code
-COPY frontend/ .
+# Copy source code (but not node_modules from host)
+COPY frontend/public ./public
+COPY frontend/src ./src
 
 # Build production bundle
 RUN npm run build
