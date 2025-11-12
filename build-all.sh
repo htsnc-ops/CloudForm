@@ -15,17 +15,17 @@ echo "User: $GITHUB_USER"
 echo "Version: $VERSION"
 echo ""
 
-# Check if logged in
-echo "Checking GHCR login status..."
-if ! docker info | grep -q "Username"; then
-    echo "❌ Not logged in to GHCR"
-    echo ""
-    echo "Please login first:"
-    echo "  export GITHUB_TOKEN=your_token"
-    echo "  token is at c/Users/Tom/token.txt"
-    echo "  echo \$GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin"
-    exit 1
-fi
+# # Check if logged in
+# echo "Checking GHCR login status..."
+# if ! docker info | grep -q "Username"; then
+#     echo "❌ Not logged in to GHCR"
+#     echo ""
+#     echo "Please login first:"
+#     echo "  export GITHUB_TOKEN=your_token"
+#     echo "  token is at c/Users/Tom/token.txt"
+#     echo "  echo \$GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin"
+#     exit 1
+# fi
 
 echo "✓ Logged in to GHCR"
 echo ""

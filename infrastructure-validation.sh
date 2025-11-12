@@ -70,12 +70,12 @@ if kubectl cluster-info &> /dev/null; then
 #     print_status "PASS" "Can connect to Kubernetes cluster"
     
     # Get cluster info
-    CLUSTER_VERSION=$(kubectl version -o json 2>/dev/null | grep -A7 '"serverVersion"' | grep -o '"gitVersion": *"[^"]*"' | cut -d'"' -f4)
+    CLUSTER_VERSION=$(kubectl version -o json 2>/dev/null | grep -A7 '"serverVersion"' | grep -o '"gitVersion": *"[^"]*"' | cut -d '"' -f4)
     print_status "INFO" "Cluster version: $CLUSTER_VERSION"
     
     # Check version compatibility (needs 1.24+)
     MIN_VERSION="1.24"
-    CURRENT_VERSION=$(echo $CLUSTER_VERSION | grep -oP 'v\K[0-9]+\.[0-9]+')
+    CURRENT_VERSION=$(echo $CLUSTER_VERSION | grep -o 'v\K[0-9]+\.[0-9]+')
     if [[ $(echo -e "$MIN_VERSION\n$CURRENT_VERSION" | sort -V | head -n1) == "$MIN_VERSION" ]]; then
         print_status "PASS" "Cluster version is $CURRENT_VERSION (>= $MIN_VERSION required)"
     else
