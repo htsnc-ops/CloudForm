@@ -6,7 +6,7 @@ global:
   imagePullSecrets: []
 
 # Namespace
-namespace: htsnc-cloud
+namespace: htsnc
 
 # Portal API Service
 portalApi:
