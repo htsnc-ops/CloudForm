@@ -260,7 +260,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: client-{{client-id}}-{{session-id}}
-  namespace: htsnc-cloud
+  namespace: htsnc
   labels:
     app: cloudform
     client-id: {{client-id}}

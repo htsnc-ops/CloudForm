@@ -68,16 +68,16 @@ postgresql:
 5. Install Cloud Portal
 bash# Install with Helm
 helm install cloudform ./helm \
-  --namespace htsnc-cloud \
+  --namespace htsnc \
   --values values.yaml \
   --wait \
   --timeout 10m
 
 # Verify installation
-kubectl get pods -n htsnc-cloud
+kubectl get pods -n htsnc
 6. Configure Keycloak
 bash# Port-forward to Keycloak
-kubectl port-forward -n htsnc-cloud svc/cloudform-keycloak 8080:8080
+kubectl port-forward -n htsnc svc/cloudform-keycloak 8080:8080
 
 # Access Keycloak admin console
 # URL: http://localhost:8080
@@ -106,7 +106,7 @@ Create users and assign roles
 
 7. Configure Vault
 bash# Port-forward to Vault
-kubectl port-forward -n htsnc-cloud svc/cloudform-vault 8200:8200
+kubectl port-forward -n htsnc svc/cloudform-vault 8200:8200
 
 # Initialize Vault
 export VAULT_ADDR='http://localhost:8200'
@@ -140,25 +140,25 @@ kubectl create secret generic cloudform-secrets \
   --from-literal=database-url="postgresql://cloudportal:<password>@cloudform-postgresql:5432/cloudportal" \
   --from-literal=keycloak-client-secret="<client-secret-from-keycloak>" \
   --from-literal=vault-token="<vault-token>" \
-  --namespace htsnc-cloud \
+  --namespace htsnc \
   --dry-run=client -o yaml | kubectl apply -f -
 9. Verify Deployment
 bash# Check all pods are running
-kubectl get pods -n htsnc-cloud
-kubectl get pods -n htsnc-cloud
+kubectl get pods -n htsnc
+kubectl get pods -n htsnc
 
 # Check ingress
-kubectl get ingress -n htsnc-cloud
+kubectl get ingress -n htsnc
 
 # Check services
-kubectl get svc -n htsnc-cloud
+kubectl get svc -n htsnc
 
 # View logs
-kubectl logs -n htsnc-cloud deployment/cloudform-api
-kubectl logs -n htsnc-cloud deployment/cloudform-terminal
+kubectl logs -n htsnc deployment/cloudform-api
+kubectl logs -n htsnc deployment/cloudform-terminal
 10. Access the Portal
 bash# Get the external IP
-kubectl get ingress -n htsnc-cloud
+kubectl get ingress -n htsnc
 
 # Access the portal
 # https://your-portal.example.com
@@ -284,26 +284,26 @@ helm dependency update ./cloudform
 
 # Upgrade installation
 helm upgrade cloudform ./cloudform \
-  --namespace htsnc-cloud \
+  --namespace htsnc \
   --values my-values.yaml \
   --wait
 
 # Verify upgrade
-kubectl rollout status deployment/cloudform-api -n htsnc-cloud
-kubectl rollout status deployment/cloudform-terminal -n htsnc-cloud
+kubectl rollout status deployment/cloudform-api -n htsnc
+kubectl rollout status deployment/cloudform-terminal -n htsnc
 Rollback
 bash# List releases
-helm history cloudform -n htsnc-cloud
+helm history cloudform -n htsnc
 
 # Rollback to previous version
-helm rollback cloudform -n htsnc-cloud
+helm rollback cloudform -n htsnc
 
 # Rollback to specific version
-helm rollback cloudform 2 -n htsnc-cloud
+helm rollback cloudform 2 -n htsnc
 Backup & Restore
 Backup Database
 bash# Backup PostgreSQL
-kubectl exec -n htsnc-cloud cloudform-postgresql-0 -- \
+kubectl exec -n htsnc cloudform-postgresql-0 -- \
   pg_dump -U cloudportal cloudportal | gzip > backup-$(date +%Y%m%d).sql.gz
 
 # Backup Vault data
@@ -311,56 +311,56 @@ kubectl cp cloudform/cloudform-vault-0:/vault/data ./vault-backup-$(date +%Y%m%d
 Restore Database
 bash# Restore PostgreSQL
 gunzip < backup-20251110.sql.gz | \
-  kubectl exec -i -n htsnc-cloud cloudform-postgresql-0 -- \
+  kubectl exec -i -n htsnc cloudform-postgresql-0 -- \
   psql -U cloudportal cloudportal
 
 # Restore Vault
 kubectl cp ./vault-backup-20251110 cloudform/cloudform-vault-0:/vault/data
-kubectl rollout restart statefulset/cloudform-vault -n htsnc-cloud
+kubectl rollout restart statefulset/cloudform-vault -n htsnc
 Troubleshooting
 Check Logs
 bash# API logs
-kubectl logs -f -n htsnc-cloud deployment/cloudform-api
+kubectl logs -f -n htsnc deployment/cloudform-api
 
 # Terminal service logs
-kubectl logs -f -n htsnc-cloud deployment/cloudform-terminal
+kubectl logs -f -n htsnc deployment/cloudform-terminal
 
 # Frontend logs
-kubectl logs -f -n htsnc-cloud deployment/cloudform-frontend
+kubectl logs -f -n htsnc deployment/cloudform-frontend
 
 # Container logs
-kubectl logs -f -n htsnc-cloud <pod-name>
+kubectl logs -f -n htsnc <pod-name>
 Common Issues
 Pods not starting:
 bash# Check events
-kubectl describe pod <pod-name> -n htsnc-cloud
+kubectl describe pod <pod-name> -n htsnc
 
 # Check resource quotas
-kubectl describe resourcequota -n htsnc-cloud
+kubectl describe resourcequota -n htsnc
 Database connection issues:
 bash# Test connection from API pod
-kubectl exec -it -n htsnc-cloud deployment/cloudform-api -- \
+kubectl exec -it -n htsnc deployment/cloudform-api -- \
   /bin/sh -c 'apk add postgresql-client && psql $DATABASE_URL'
 WebSocket connection failing:
 bash# Check ingress annotations
-kubectl describe ingress cloudform -n htsnc-cloud
+kubectl describe ingress cloudform -n htsnc
 
 # Verify terminal service is running
-kubectl get pods -n htsnc-cloud -l app.kubernetes.io/component=terminal
+kubectl get pods -n htsnc -l app.kubernetes.io/component=terminal
 Container creation failing:
 bash# Check RBAC permissions
-kubectl auth can-i create pods --namespace htsnc-cloud --as system:serviceaccount:cloudform:cloudform-api-sa
+kubectl auth can-i create pods --namespace htsnc --as system:serviceaccount:cloudform:cloudform-api-sa
 
 # Check resource quotas
-kubectl describe resourcequota -n htsnc-cloud
+kubectl describe resourcequota -n htsnc
 Monitoring
 View Metrics
 bash# API metrics
-kubectl port-forward -n htsnc-cloud svc/cloudform-api 8080:8080
+kubectl port-forward -n htsnc svc/cloudform-api 8080:8080
 curl http://localhost:8080/metrics
 
 # Terminal metrics
-kubectl port-forward -n htsnc-cloud svc/cloudform-terminal 8081:8081
+kubectl port-forward -n htsnc svc/cloudform-terminal 8081:8081
 curl http://localhost:8081/metrics
 Prometheus Queries
 promql# Active containers
@@ -377,13 +377,13 @@ cloudportal_websocket_connections
 Scaling
 Manual Scaling
 bash# Scale API
-kubectl scale deployment cloudform-api -n htsnc-cloud --replicas=5
+kubectl scale deployment cloudform-api -n htsnc --replicas=5
 
 # Scale Terminal Service
-kubectl scale deployment cloudform-terminal -n htsnc-cloud --replicas=5
+kubectl scale deployment cloudform-terminal -n htsnc --replicas=5
 Configure HPA
 Already configured in values.yaml. Verify:
-bashkubectl get hpa -n htsnc-cloud
+bashkubectl get hpa -n htsnc
 Security Considerations
 SSL/TLS
 
@@ -441,7 +441,7 @@ portalApi:
     targetCPUUtilizationPercentage: 60  # Scale earlier
 Uninstall
 bash# Uninstall Helm release
-helm uninstall cloudform -n htsnc-cloud
+helm uninstall cloudform -n htsnc
 
 # Delete namespaces
 kubectl delete namespace htsnc-cloud
@@ -460,7 +460,7 @@ minikube addons enable metrics-server
 
 # Install with dev values
 helm install cloudform ./cloudform \
-  --namespace htsnc-cloud \
+  --namespace htsnc \
   --create-namespace \
   --values values-dev.yaml
 
@@ -500,7 +500,7 @@ jobs:
     - name: Deploy
       run: |
         helm upgrade --install cloudform ./cloudform \
-          --namespace htsnc-cloud \
+          --namespace htsnc \
           --values values-prod.yaml \
           --set portalApi.image.tag=${{ github.sha }} \
           --wait

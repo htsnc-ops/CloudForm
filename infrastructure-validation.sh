@@ -471,7 +471,7 @@ if [ $FAILED -eq 0 ]; then
     echo "Next steps:"
     echo "  1. Review any warnings above"
     echo "  2. Proceed with Cloud Portal installation"
-    echo "  3. Run: helm install cloudform helm --namespace htsnc-cloud --create-namespace"
+    echo "  3. Run: helm install cloudform helm --namespace htsnc --create-namespace"
     exit 0
 elif [ $FAILED -le 2 ]; then
     echo -e "${YELLOW}⚠ Your cluster is mostly ready but has some issues${NC}"
