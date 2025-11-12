@@ -38,21 +38,21 @@ echo ""
 # echo "✓ Portal API built"
 # echo ""
 
-# Build Terminal
-echo "📦 Building Terminal Service..."
-docker build -t $REGISTRY/$GITHUB_USER/cloud-portal-terminal:$VERSION \
-    -t $REGISTRY/$GITHUB_USER/cloud-portal-terminal:latest \
-    -f Dockerfile.terminal .
-echo "✓ Terminal Service built"
-echo ""
-
-# # Build Frontend
-# echo "📦 Building Frontend..."
-# docker build -t $REGISTRY/$GITHUB_USER/cloud-portal-frontend:$VERSION \
-#     -t $REGISTRY/$GITHUB_USER/cloud-portal-frontend:latest \
-#     -f Dockerfile.frontend .
-# echo "✓ Frontend built"
+# # Build Terminal
+# echo "📦 Building Terminal Service..."
+# docker build -t $REGISTRY/$GITHUB_USER/cloud-portal-terminal:$VERSION \
+#     -t $REGISTRY/$GITHUB_USER/cloud-portal-terminal:latest \
+#     -f Dockerfile.terminal .
+# echo "✓ Terminal Service built"
 # echo ""
+
+# Build Frontend
+echo "📦 Building Frontend..."
+docker build -t $REGISTRY/$GITHUB_USER/cloud-portal-frontend:$VERSION \
+    -t $REGISTRY/$GITHUB_USER/cloud-portal-frontend:latest \
+    -f Dockerfile.frontend .
+echo "✓ Frontend built"
+echo ""
 
 # # Push images
 # echo "================================"

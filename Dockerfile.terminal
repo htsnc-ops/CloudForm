@@ -37,11 +37,10 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app ./
 
 # Create non-root user
-RUN addgroup -g 1000 appuser && \
-    adduser -D -u 1000 -G appuser appuser && \
-    chown -R appuser:appuser /app && \
-    mkdir -p /tmp && \
-    chown -R appuser:appuser /tmp
+RUN addgroup appuser && \
+    adduser -D -G appuser appuser && \
+    mkdir -p /app /tmp && \
+    chown -R appuser:appuser /app /tmp
 
 USER appuser
 
