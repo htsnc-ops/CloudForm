@@ -31,13 +31,13 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ include "cloudform.fullname" . }}-view
+  name: {{ include "cloudform.fullname" . }}-admin
   labels:
     {{- include "cloudform.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ include "cloudform.fullname" . }}-view
+  name: argocd-admin
 subjects:
 - kind: ServiceAccount
   name: {{ .Values.rbac.portalApi.name }}
