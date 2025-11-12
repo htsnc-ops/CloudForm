@@ -13,7 +13,7 @@ portalApi:
   enabled: true
   replicaCount: 2
   image:
-    repository: your-registry/cloudform-api
+    repository: ghcr.io/htsnc-ops/cloudform-api
     tag: 1.0.0
     pullPolicy: IfNotPresent
   
@@ -66,7 +66,7 @@ terminalService:
   enabled: true
   replicaCount: 2
   image:
-    repository: your-registry/cloudform-terminal
+    repository: ghcr.io/htsnc-ops/cloudform-terminal
     tag: 1.0.0
     pullPolicy: IfNotPresent
   
@@ -100,7 +100,7 @@ frontend:
   enabled: true
   replicaCount: 2
   image:
-    repository: your-registry/cloudform-frontend
+    repository: ghcr.io/htsnc-ops/cloudform-frontend
     tag: 1.0.0
     pullPolicy: IfNotPresent
   
