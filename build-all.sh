@@ -4,7 +4,7 @@
 
 # Configuration
 GITHUB_USER=${GITHUB_USER:-"htsnc-ops"}
-VERSION=${VERSION:-"1.0.0"}
+VERSION=${VERSION:-"1.0.1"}
 REGISTRY="ghcr.io"
 
 echo "================================"
@@ -32,45 +32,45 @@ echo ""
 
 # Build API
 echo "📦 Building Portal API..."
-docker build -t $REGISTRY/$GITHUB_USER/cloud-portal-api:$VERSION \
-    -t $REGISTRY/$GITHUB_USER/cloud-portal-api:latest \
-    -f Dockerfile.api .
-echo "✓ Portal API built"
+docker buildx build -t $REGISTRY/$GITHUB_USER/cloudform-api:$VERSION \
+    -t $REGISTRY/$GITHUB_USER/cloudform-api:latest \
+    -f Dockerfile.api --push .
+echo "✓ Portal API built and pushed"
 echo ""
 
 # Build Terminal
 echo "📦 Building Terminal Service..."
-docker build -t $REGISTRY/$GITHUB_USER/cloud-portal-terminal:$VERSION \
-    -t $REGISTRY/$GITHUB_USER/cloud-portal-terminal:latest \
-    -f Dockerfile.terminal .
-echo "✓ Terminal Service built"
+docker buildx build -t $REGISTRY/$GITHUB_USER/cloudform-terminal:$VERSION \
+    -t $REGISTRY/$GITHUB_USER/cloudform-terminal:latest \
+    -f Dockerfile.terminal --push .
+echo "✓ Terminal Service built and pushed"
 echo ""
 
 # Build Frontend
 echo "📦 Building Frontend..."
-docker build -t $REGISTRY/$GITHUB_USER/cloud-portal-frontend:$VERSION \
-    -t $REGISTRY/$GITHUB_USER/cloud-portal-frontend:latest \
-    -f Dockerfile.frontend .
-echo "✓ Frontend built"
+docker buildx build -t $REGISTRY/$GITHUB_USER/cloudform-frontend:$VERSION \
+    -t $REGISTRY/$GITHUB_USER/cloudform-frontend:latest \
+    -f Dockerfile.frontend --push .
+echo "✓ Frontend built and pushed"
 echo ""
 
-# Push images
-echo "================================"
-echo "Pushing Images to GHCR"
-echo "================================"
-echo ""
+# # Push images
+# echo "================================"
+# echo "Pushing Images to GHCR"
+# echo "================================"
+# echo ""
 
-echo "📤 Pushing Portal API..."
-docker push $REGISTRY/$GITHUB_USER/cloud-portal-api:$VERSION
-docker push $REGISTRY/$GITHUB_USER/cloud-portal-api:latest
+# echo "📤 Pushing Portal API..."
+# docker push $REGISTRY/$GITHUB_USER/cloudform-api:$VERSION
+# docker push $REGISTRY/$GITHUB_USER/cloudform-api:latest
 
-echo "📤 Pushing Terminal Service..."
-docker push $REGISTRY/$GITHUB_USER/cloud-portal-terminal:$VERSION
-docker push $REGISTRY/$GITHUB_USER/cloud-portal-terminal:latest
+# echo "📤 Pushing Terminal Service..."
+# docker push $REGISTRY/$GITHUB_USER/cloudform-terminal:$VERSION
+# docker push $REGISTRY/$GITHUB_USER/cloudform-terminal:latest
 
-echo "📤 Pushing Frontend..."
-docker push $REGISTRY/$GITHUB_USER/cloud-portal-frontend:$VERSION
-docker push $REGISTRY/$GITHUB_USER/cloud-portal-frontend:latest
+# echo "📤 Pushing Frontend..."
+# docker push $REGISTRY/$GITHUB_USER/cloudform-frontend:$VERSION
+# docker push $REGISTRY/$GITHUB_USER/cloudform-frontend:latest
 
 echo ""
 echo "================================"
@@ -78,9 +78,9 @@ echo "✅ All images built and pushed!"
 echo "================================"
 echo ""
 echo "Images:"
-echo "  • $REGISTRY/$GITHUB_USER/cloud-portal-api:$VERSION"
-echo "  • $REGISTRY/$GITHUB_USER/cloud-portal-terminal:$VERSION"
-echo "  • $REGISTRY/$GITHUB_USER/cloud-portal-frontend:$VERSION"
+echo "  • $REGISTRY/$GITHUB_USER/cloudform-api:$VERSION"
+echo "  • $REGISTRY/$GITHUB_USER/cloudform-terminal:$VERSION"
+echo "  • $REGISTRY/$GITHUB_USER/cloudform-frontend:$VERSION"
 echo ""
 echo "Next steps:"
 echo "  1. Make images public on GitHub"
