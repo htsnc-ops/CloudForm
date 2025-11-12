@@ -2,21 +2,64 @@
 {{- range $key, $val := .Values.rbac }}
 {{- if ne $key "create" }}
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: ClusterRole
 metadata:
-  name: {{ printf "%s-cluster-admin-binding" $key }}
+  name: {{ include "argocd.fullname" . }}-application-controller
   labels:
-    app.kubernetes.io/instance: {{ $.Release.Name }}
-    app.kubernetes.io/managed-by: {{ $.Release.Service }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-  - kind: ServiceAccount
-    name: {{ $val.name }}
-    namespace: {{ $.Values.namespace }}
----
+    app.kubernetes.io/name: {{ include "argocd.name" . }}
+    app.kubernetes.io/component: application-controller
+    app.kubernetes.io/part-of: {{ .Release.Namespace }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+rules:
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - scrapeconfigs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - resource.k8s.io
+  resources:
+  - '*'
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - '*'
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - flowcontrol.apiserver.k8s.io
+  resources:
+  - flowschemas
+  verbs:
+  - get
+  - list
+  - watch
+- nonResourceURLs:
+  - '*'
+  verbs:
+  - get
+  - list
+
 {{- end }}
 {{- end }}
 {{- end }}

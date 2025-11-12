@@ -44,8 +44,6 @@ RUN addgroup appuser && \
     chown -R appuser:appuser /usr/share/nginx/html /var/cache/nginx /var/log/nginx /var/run && \
     chmod -R 755 /usr/share/nginx/html
 
-USER appuser
-
 # Expose port
 EXPOSE 8080
 
