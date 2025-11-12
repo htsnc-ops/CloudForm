@@ -4,7 +4,7 @@
 
 # Configuration
 GITHUB_USER=${GITHUB_USER:-"htsnc-ops"}
-VERSION=${VERSION:-"1.0.2"}
+VERSION=${VERSION:-"1.0.3"}
 REGISTRY="ghcr.io"
 
 echo "================================"

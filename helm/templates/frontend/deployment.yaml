@@ -43,11 +43,15 @@ spec:
         resources:
           {{- toYaml .Values.frontend.resources | nindent 10 }}
         volumeMounts:
+        - name: run
+          mountPath: /run
         - name: tmp
           mountPath: /tmp
         - name: cache
           mountPath: /var/cache/nginx
       volumes:
+      - name: run
+        emptyDir: {}
       - name: tmp
         emptyDir: {}
       - name: cache
