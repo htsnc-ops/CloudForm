@@ -15,7 +15,7 @@ rules:
   resources: ["nodes", "persistentvolumes"]
   verbs: ["get", "list"]
 - apiGroups: ["monitoring.coreos.com"]
-  resources: ["scrapeconfigs"]
+  resources: ["scrapeconfigs", "prometheusagents"]
   verbs: ["get", "list", "watch"]
 - apiGroups: ["resource.k8s.io"]
   resources: [""]
