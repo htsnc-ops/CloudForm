@@ -18,13 +18,13 @@ maintainers:
 dependencies:
   - name: keycloak
     version: "18.x.x"
-    repository: "https://charts.bitnami.com/bitnami"
+    repository: "file://keycloak"
     condition: keycloak.enabled
   - name: vault
     version: "0.27.x"
-    repository: "https://helm.releases.hashicorp.com"
+    repository: "file://vault"
     condition: vault.enabled
   - name: postgresql
     version: "13.x.x"
-    repository: "https://charts.bitnami.com/bitnami"
+    repository: "file://postgresql"
     condition: postgresql.enabled

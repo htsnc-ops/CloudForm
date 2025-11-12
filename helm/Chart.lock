@@ -1,12 +1,12 @@
 dependencies:
 - name: keycloak
-  repository: https://charts.bitnami.com/bitnami
+  repository: file://keycloak
   version: 18.7.1
 - name: vault
-  repository: https://helm.releases.hashicorp.com
+  repository: file://vault
   version: 0.27.0
 - name: postgresql
-  repository: https://charts.bitnami.com/bitnami
+  repository: file://postgresql
   version: 13.4.4
-digest: sha256:83ef2a8fca19792cfe8da387c9bf5d893b1ca990fbdedef482c87903d73b3426
-generated: "2025-11-11T14:51:34.43938121-05:00"
+digest: sha256:b55a3e80ebf8129835f62175e22e4e3c46b9c6198d7bb438211b5f5fc4214657
+generated: "2025-11-12T07:47:24.356713-05:00"

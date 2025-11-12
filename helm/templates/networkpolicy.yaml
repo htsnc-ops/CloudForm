@@ -90,7 +90,7 @@ spec:
           name: {{ .Values.containers.namespace }}
     ports:
     - protocol: TCP
-      port: 1-65535  # Allow exec into containers
+      port: 65533  # Allow exec into containers
   - to:
     - namespaceSelector: {}
       podSelector:
