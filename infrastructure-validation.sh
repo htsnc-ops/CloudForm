@@ -338,8 +338,7 @@ check_or_create_namespace() {
     fi
 }
 
-check_or_create_namespace "cloudform"
-check_or_create_namespace "cloudform-containers"
+check_or_create_namespace "harbortech"
 
 ################################################################################
 # 9. Check Network Policies Support

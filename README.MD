@@ -335,7 +335,7 @@ VAULT_MOUNT_PATH=cloudform
 # Kubernetes
 KUBERNETES_SERVICE_HOST=kubernetes.default.svc
 KUBERNETES_SERVICE_PORT=443
-CONTAINER_NAMESPACE=cloudform-containers
+CONTAINER_NAMESPACE=harbortech
 
 # Application
 PORT=8080
