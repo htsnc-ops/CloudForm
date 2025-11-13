@@ -1,6 +1,6 @@
-{{- if .Values.rbac.create -}}
-{{- range $key, $val := .Values.rbac }}
-{{- if ne $key "create" }}
+# {{- if .Values.rbac.create -}}
+# {{- range $key, $val := .Values.rbac }}
+# {{- if ne $key "create" }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -12,7 +12,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
   annotations:
     meta.helm.sh/release-name: cloudform
-    meta.helm.sh/release-namespace: harbortech
+    meta.helm.sh/release-namespace: argocd
 rules:
 - apiGroups:
   - monitoring.coreos.com
@@ -60,6 +60,6 @@ rules:
   - get
   - list
 
-{{- end }}
-{{- end }}
-{{- end }}
+# {{- end }}
+# {{- end }}
+# {{- end }}

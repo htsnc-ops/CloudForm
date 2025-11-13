@@ -1,0 +1,138 @@
+---
+# ServiceAccount for API
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudform-api-sa
+  namespace: harbortech
+---
+# ServiceAccount for Terminal
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudform-terminal-sa
+  namespace: harbortech
+---
+# ServiceAccount for Client Containers
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudform-client
+  namespace: cloudform-containers
+---
+# Role for API in main namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cloudform-api
+  namespace: harbortech
+rules:
+- apiGroups: [""]
+  resources: ["secrets", "configmaps"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+---
+# Role for API to manage containers
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cloudform-api-containers
+  namespace: cloudform-containers
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log", "pods/exec"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "list", "watch"]
+---
+# Role for Terminal Service
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cloudform-terminal-containers
+  namespace: cloudform-containers
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods/exec", "pods/attach"]
+  verbs: ["create", "get"]
+---
+# ClusterRole for viewing cluster resources
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cloudform-view
+rules:
+- apiGroups: [""]
+  resources: ["namespaces", "nodes"]
+  verbs: ["get", "list"]
+---
+# Bind API role in main namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cloudform-api
+  namespace: harbortech
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cloudform-api
+subjects:
+- kind: ServiceAccount
+  name: cloudform-api-sa
+  namespace: harbortech
+---
+# Bind API to container management role
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cloudform-api-containers
+  namespace: cloudform-containers
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cloudform-api-containers
+subjects:
+- kind: ServiceAccount
+  name: cloudform-api-sa
+  namespace: harbortech
+---
+# Bind Terminal to container exec role
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cloudform-terminal-containers
+  namespace: cloudform-containers
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cloudform-terminal-containers
+subjects:
+- kind: ServiceAccount
+  name: cloudform-terminal-sa
+  namespace: harbortech
+---
+# Bind view permissions
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cloudform-view
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cloudform-view
+subjects:
+- kind: ServiceAccount
+  name: cloudform-api-sa
+  namespace: harbortech
