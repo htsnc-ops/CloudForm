@@ -161,10 +161,10 @@ ingress:
           backend: api
         - path: /ws
           pathType: Prefix
-          backend: terminal
+          backend: cloudform-terminal
         - path: /auth
           pathType: Prefix
-          backend: keycloak
+          backend: cloudform-keycloak
         - path: /
           pathType: Prefix
           backend: frontend
@@ -172,8 +172,12 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-          backend:
-            service:
+          backend: vault
+    - host: cloudform-keycloak.harbortechnc.com
+      paths:
+        - path: /
+          pathType: Prefix
+          backend: keycloak
   
   tls:
     - secretName: cloudform-tls
