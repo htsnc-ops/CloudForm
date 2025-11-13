@@ -34,7 +34,7 @@ spec:
       - name: api
         securityContext:
           {{- toYaml .Values.security.containerSecurityContext | nindent 10 }}
-        image: "{{ .Values.portalApi.image.repository }}:{{ .Values.portalApi.image.tag }}"
+        image: "{{ .Values.portalApi.image.repository }}:{{ .Values.htsnc.tag }}"
         imagePullPolicy: {{ .Values.portalApi.image.pullPolicy }}
         ports:
         - name: http

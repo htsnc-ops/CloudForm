@@ -32,7 +32,7 @@ spec:
       - name: terminal
         securityContext:
           {{- toYaml .Values.security.containerSecurityContext | nindent 10 }}
-        image: "{{ .Values.terminalService.image.repository }}:{{ .Values.terminalService.image.tag }}"
+        image: "{{ .Values.terminalService.image.repository }}:{{ .Values.htsnc.tag }}"
         imagePullPolicy: {{ .Values.terminalService.image.pullPolicy }}
         ports:
         - name: ws

@@ -1,7 +1,7 @@
 ---
 # Custom images tags
 htsnc:
-  tag: 1.0.3
+  tag: 1.0.4
 
 # Global settings
 global:
@@ -18,7 +18,6 @@ portalApi:
   replicaCount: 2
   image:
     repository: ghcr.io/htsnc-ops/cloudform-api
-    tag: 1.0.3
     pullPolicy: IfNotPresent
   
   service:
@@ -71,7 +70,6 @@ terminalService:
   replicaCount: 2
   image:
     repository: ghcr.io/htsnc-ops/cloudform-terminal
-    tag: 1.0.3
     pullPolicy: IfNotPresent
   
   service:
@@ -105,7 +103,6 @@ frontend:
   replicaCount: 2
   image:
     repository: ghcr.io/htsnc-ops/cloudform-frontend
-    tag: 1.0.3
     pullPolicy: IfNotPresent
   
   service:
@@ -161,10 +158,10 @@ ingress:
       paths:
         - path: /api
           pathType: Prefix
-          backend: cloudform-api
+          backend: api
         - path: /ws
           pathType: Prefix
-          backend: terminal-service
+          backend: terminal
         - path: /auth
           pathType: Prefix
           backend: keycloak
