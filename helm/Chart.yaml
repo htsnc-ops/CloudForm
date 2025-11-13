@@ -15,17 +15,17 @@ keywords:
 maintainers:
   - name: Cloud Portal Team
     email: team@example.com
-dependencies:
-  - name: keycloak
-    version: "18.x.x"
-    repository: "file://keycloak"
-    condition: keycloak.enabled
-  - name: vault
-    version: "0.27.x"
-    repository: "file://vault"
-    condition: vault.enabled
-  - name: postgresql
-    version: "13.x.x"
-    repository: "file://postgresql"
-    condition: postgresql.enabled
+# dependencies:
+#   - name: keycloak
+#     version: "18.x.x"
+#     repository: "file://keycloak"
+#     condition: keycloak.enabled
+#   - name: vault
+#     version: "0.27.x"
+#     repository: "file://vault"
+#     condition: vault.enabled
+#   - name: postgresql
+#     version: "13.x.x"
+#     repository: "file://postgresql"
+#     condition: postgresql.enabled
     
