@@ -5,7 +5,7 @@ htsnc:
 
 # Global settings
 global:
-  domain: cloudform.example.com
+  domain: "harbortechnc.com"
   storageClass: standard
   imagePullSecrets: []
 
@@ -145,7 +145,7 @@ containers:
 # Ingress
 ingress:
   enabled: true
-  className: nginx
+  className: nginx-cloudform
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -168,6 +168,12 @@ ingress:
         - path: /
           pathType: Prefix
           backend: frontend
+    - host: cloudform-vault.harbortechnc.com
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
   
   tls:
     - secretName: cloudform-tls
