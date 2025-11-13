@@ -9,9 +9,9 @@ metadata:
     app.kubernetes.io/name: argocd
     app.kubernetes.io/component: application-controller
     app.kubernetes.io/part-of: harbortech
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/managed-by: Helm
   annotations:
-    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-name: cloudform
     meta.helm.sh/release-namespace: harbortech
 rules:
 - apiGroups:
