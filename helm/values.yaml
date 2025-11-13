@@ -154,7 +154,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
   
   hosts:
-    - host: cloudform.example.com
+    - host: cloudform.harbortechnc.com
       paths:
         - path: /api
           pathType: Prefix
@@ -172,7 +172,7 @@ ingress:
   tls:
     - secretName: cloudform-tls
       hosts:
-        - cloudform.example.com
+        - cloudform.harbortechnc.com
 
 # Keycloak (Auth)
 keycloak:
