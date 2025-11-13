@@ -1,18 +1,18 @@
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: argocd-admin-sa-binding
+  name: {{ printf "%s-full-access-binding" .Release.Name }}
+  labels:
+    app.kubernetes.io/name: {{ include "cloudform.name" . | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cluster-admin
+  name: {{ printf "%s-full-access" .Release.Name }}
 subjects:
+  {{- if .Values.sharedServiceAccount.create -}}
   - kind: ServiceAccount
-    name: argocd-admin-sa
-    namespace: argo
-  - kind: ServiceAccount
-    name: argocd-application-controller
-    namespace: argo
-  - kind: ServiceAccount
-    name: cloudform-shared-sa
-    namespace: harbortech
+    name: {{ .Values.sharedServiceAccount.name | default "cloudform-shared-sa" }}
+    namespace: {{ .Values.namespace | default "harbortech" }}
+  {{- end }}

@@ -4,56 +4,16 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ include "cloudform.fullname" . }}-api
-  namespace: {{ .Values.namespace }}
+  name: {{ printf "%s-full-access" .Release.Name }}
+  namespace: {{ .Values.namespace | default "harbortech" }}
   labels:
-    {{- include "cloudform.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ include "cloudform.name" . | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
 rules:
-- apiGroups: [""]
-  resources: ["secrets", "configmaps"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["events"]
-  verbs: ["create", "patch"]
----
-# Role for Portal API in container namespace
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: {{ include "cloudform.fullname" . }}-api-containers
-  namespace: {{ .Values.containers.namespace }}
-  labels:
-    {{- include "cloudform.labels" . | nindent 4 }}
-rules:
-- apiGroups: [""]
-  resources: ["pods", "pods/log", "pods/exec"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["get", "list", "create", "update", "patch", "delete"]
-- apiGroups: [""]
-  resources: ["configmaps"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["events"]
-  verbs: ["get", "list", "watch"]
----
-# Role for Terminal Service in container namespace
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: {{ include "cloudform.fullname" . }}-terminal-containers
-  namespace: {{ .Values.containers.namespace }}
-  labels:
-    {{- include "cloudform.labels" . | nindent 4 }}
-rules:
-- apiGroups: [""]
-  resources: ["pods", "pods/log"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["pods/exec"]
-  verbs: ["create"]
-- apiGroups: [""]
-  resources: ["pods/attach"]
-  verbs: ["create", "get"]
+  - apiGroups:
+      - "*"
+    resources:
+      - "*"
+    verbs:
+      - "*"
 {{- end }}

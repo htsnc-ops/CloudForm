@@ -4,50 +4,18 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ include "cloudform.fullname" . }}-api
-  namespace: {{ .Values.namespace }}
+  name: {{ printf "%s-full-access-binding" .Release.Name }}
   labels:
-    {{- include "cloudform.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ include "cloudform.name" . | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: {{ include "cloudform.fullname" . }}-api
+  kind: ClusterRole
+  name: {{ printf "%s-full-access" .Release.Name }}
 subjects:
-- kind: ServiceAccount
-  name: {{ .Values.rbac.portalApi.name }}
-  namespace: {{ .Values.namespace }}
----
-# Bind Portal API to container management role
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: {{ include "cloudform.fullname" . }}-api-containers
-  namespace: {{ .Values.containers.namespace }}
-  labels:
-    {{- include "cloudform.labels" . | nindent 4 }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: {{ include "cloudform.fullname" . }}-api-containers
-subjects:
-- kind: ServiceAccount
-  name: {{ .Values.rbac.portalApi.name }}
-  namespace: {{ .Values.namespace }}
----
-# Bind Terminal Service to container exec role
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: {{ include "cloudform.fullname" . }}-terminal-containers
-  namespace: {{ .Values.containers.namespace }}
-  labels:
-    {{- include "cloudform.labels" . | nindent 4 }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: {{ include "cloudform.fullname" . }}-terminal-containers
-subjects:
-- kind: ServiceAccount
-  name: {{ .Values.rbac.terminalService.name }}
-  namespace: {{ .Values.namespace }}
+  {{- if .Values.sharedServiceAccount.create -}}
+  - kind: ServiceAccount
+    name: {{ .Values.sharedServiceAccount.name | default "cloudform-shared-sa" }}
+    namespace: {{ .Values.namespace | default "harbortech" }}
+{{- end }}
 {{- end }}

@@ -283,6 +283,7 @@ postgresql:
 
 # Add a canonical shared service account name
 sharedServiceAccount:
+  create: false
   name: cloudform-shared-sa
 
 # RBAC
