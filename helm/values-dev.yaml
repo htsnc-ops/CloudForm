@@ -2,6 +2,10 @@
 global:
   domain: portal-dev.example.com
 
+# Monitoring
+monitoring:
+  enabled: false
+
 portalApi:
   replicaCount: 1
   env:
