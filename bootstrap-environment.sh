@@ -26,6 +26,8 @@ kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.pas
 # Install dependencies macos
 # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
+kubectl create clusterrolebinding argocd-admin --clusterrole=cluster-admin --serviceaccount=argocd:argocd-application-controller
+
 brew install npm
 
 echo " to ensure npm builds are successful, "
