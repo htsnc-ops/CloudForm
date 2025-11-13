@@ -4,19 +4,19 @@ brew install minikube
 
 minikube start
 
-kubectl create namespace argo
+kubectl create namespace argocd
 
 # Install ArgoCD using the official manifest
-kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
 # Watch the pods come up
-kubectl get pods -n argo -w
+kubectl get pods -n argocd -w
 
 # Forward ArgoCD server port to localhost
-kubectl port-forward svc/argocd-server -n argo 8080:443
+kubectl port-forward svc/argocd-server -n argocd 8080:443
 
 # Show password for ArgoCD initial admin account
-kubectl get secret argocd-initial-admin-secret -n argo -o jsonpath="{.data.password}" | base64 -d
+kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d
 
 # Install dependencies for Linux
 # test -d ~/.linuxbrew && eval "$(~/.linuxbrew/bin/brew shellenv)"
