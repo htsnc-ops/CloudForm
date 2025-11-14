@@ -152,32 +152,38 @@ ingress:
     nginx.ingress.kubernetes.io/websocket-services: terminal-service
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-  
+
   hosts:
     - host: cloudform.harbortechnc.com
       paths:
         - path: /api
           pathType: Prefix
-          backend: api
+          backend: cloudform-api
+          port: 8080
         - path: /ws
           pathType: Prefix
           backend: cloudform-terminal
+          port: 8081
         - path: /auth
           pathType: Prefix
           backend: cloudform-keycloak
+          port: 8203
         - path: /
           pathType: Prefix
           backend: cloudform-frontend
+          port: 80
     - host: cloudform-vault.harbortechnc.com
       paths:
         - path: /
           pathType: Prefix
           backend: cloudform-vault
+          port: 8203
     - host: cloudform-keycloak.harbortechnc.com
       paths:
         - path: /
           pathType: Prefix
           backend: cloudform-keycloak
+          port: 8082
   
   tls:
     - secretName: cloudform-tls
@@ -186,13 +192,10 @@ ingress:
 
 # Keycloak (Auth)
 keycloak:
-  enabled: true
+  enabled: false
   auth:
     adminUser: admin
     adminPassword: changeme123
-  serviceAccount:
-    create: false
-    name: cloudform-shared-sa
   
   postgresql:
     enabled: true
@@ -200,9 +203,6 @@ keycloak:
       username: keycloak
       password: keycloak123
       database: keycloak
-    serviceAccount:
-      create: false
-      name: cloudform-shared-sa
   
   service:
     type: ClusterIP
@@ -236,30 +236,6 @@ vault:
         storage "file" {
           path = "/vault/data"
         }
-    
-    resources:
-      requests:
-        memory: "256Mi"
-        cpu: "250m"
-      limits:
-        memory: "512Mi"
-        cpu: "500m"
-    
-    dataStorage:
-      enabled: true
-      size: 10Gi
-      storageClass: standard
-    serviceAccount:
-      create: false
-      name: cloudform-shared-sa
-  csi:
-    serviceAccount:
-      create: false
-      name: cloudform-shared-sa
-  injector:
-    serviceAccount:
-      create: false
-      name: cloudform-shared-sa
   ui:
     enabled: true
 

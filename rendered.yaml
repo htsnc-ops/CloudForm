@@ -1,0 +1,993 @@
+---
+# Source: cloudform/templates/networkpolicy.yaml
+# Network Policy for Portal API
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cloudform-api
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cloudform
+      app.kubernetes.io/instance: cloudform
+      app.kubernetes.io/component: api
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: harbortech
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 8080
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: harbortech
+    - namespaceSelector:
+        matchLabels:
+          name: cloudform-containers
+    ports:
+    - protocol: TCP
+      port: 5432  # PostgreSQL
+    - protocol: TCP
+      port: 8080  # Keycloak
+    - protocol: TCP
+      port: 8200  # Vault
+  - to:
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+  - to:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443  # Kubernetes API
+---
+# Source: cloudform/templates/networkpolicy.yaml
+# Network Policy for Terminal Service
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cloudform-terminal
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cloudform
+      app.kubernetes.io/instance: cloudform
+      app.kubernetes.io/component: terminal
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: harbortech
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 8081
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: cloudform-containers
+    ports:
+    - protocol: TCP
+      port: 65533  # Allow exec into containers
+  - to:
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+  - to:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443  # Kubernetes API
+    - protocol: TCP
+      port: 8080  # Keycloak for JWT validation
+---
+# Source: cloudform/templates/networkpolicy.yaml
+# Network Policy for Frontend
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cloudform-frontend
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cloudform
+      app.kubernetes.io/instance: cloudform
+      app.kubernetes.io/component: frontend
+  policyTypes:
+    - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: harbortech
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 80
+---
+# Source: cloudform/templates/networkpolicy.yaml
+# Network Policy for Client Containers
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cloudform-containers
+  namespace: cloudform-containers
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cloudform
+      app.kubernetes.io/component: container-runtime
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: harbortech
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/component: terminal
+    - namespaceSelector:
+        matchLabels:
+          name: harbortech
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/component: api
+  egress:
+  # Allow DNS
+  - to:
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+  # Allow external cloud API access
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+  # Block access to internal cluster services
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: harbortech
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+# Source: cloudform/templates/resourcequota.yaml
+# Resource Quota for Container Namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: cloudform-containers
+  namespace: cloudform-containers
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  hard:
+    requests.cpu: "50"
+    requests.memory: 50Gi
+    limits.cpu: "100"
+    limits.memory: 100Gi
+    pods: "100"
+    persistentvolumeclaims: "50"
+---
+# Source: cloudform/templates/resourcequota.yaml
+# Limit Range for Container Namespace
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cloudform-containers
+  namespace: cloudform-containers
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  limits:
+  - max:
+      cpu: "2"
+      memory: 2Gi
+    min:
+      cpu: "100m"
+      memory: 128Mi
+    default:
+      cpu: "500m"
+      memory: 512Mi
+    defaultRequest:
+      cpu: "250m"
+      memory: 256Mi
+    type: Container
+  - max:
+      cpu: "4"
+      memory: 4Gi
+    min:
+      cpu: "100m"
+      memory: 128Mi
+    type: Pod
+---
+# Source: cloudform/templates/poddisruptionbudget.yaml
+# PodDisruptionBudget for Portal API
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cloudform-api
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cloudform
+      app.kubernetes.io/instance: cloudform
+      app.kubernetes.io/component: api
+---
+# Source: cloudform/templates/poddisruptionbudget.yaml
+# PodDisruptionBudget for Terminal Service
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cloudform-terminal
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cloudform
+      app.kubernetes.io/instance: cloudform
+      app.kubernetes.io/component: terminal
+---
+# Source: cloudform/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: app-admin-sa
+  namespace: harbortech
+---
+# Source: cloudform/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloudform-secrets
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+stringData:
+  database-url: "postgresql://cloudportal:cloudportal123@cloudform-postgresql:5432/cloudportal"
+  keycloak-client-secret: "change-me-in-production"
+  vault-token: "change-me-in-production"
+  ## Convert to external secret
+---
+# Source: cloudform/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudform-config
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  container-images.json: |
+    {
+      "azure": "mcr.microsoft.com/azure-cli:latest",
+      "aws": "amazon/aws-cli:latest",
+      "gcp": "google/cloud-sdk:latest"
+    }
+  container-resources.json: |
+    {
+      "requests": {
+        "memory": "256Mi",
+        "cpu": "250m"
+      },
+      "limits": {
+        "memory": "512Mi",
+        "cpu": "500m"
+      }
+    }
+  timeouts.json: |
+    {
+      "default": 3600,
+      "idle": 900,
+      "cleanup": 300
+    }
+---
+# Source: cloudform/templates/rbac/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cloudform-full-access
+  labels:
+    app.kubernetes.io/name: "cloudform"
+    app.kubernetes.io/instance: "cloudform"
+rules:
+  - apiGroups:
+      - "*"
+    resources:
+      - "*"
+    verbs:
+      - "*"
+---
+# Source: cloudform/templates/rbac/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cloudform-full-access-binding
+  labels:
+    app.kubernetes.io/name: "cloudform"
+    app.kubernetes.io/instance: "cloudform"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cloudform-full-access
+subjects:
+---
+# Source: cloudform/templates/serviceaccount.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: app-admin-sa-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: app-admin-sa
+    namespace: harbortech
+---
+# Source: cloudform/templates/rbac/role.yaml
+# Role for Portal API in main namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cloudform-full-access
+  namespace: harbortech
+  labels:
+    app.kubernetes.io/name: "cloudform"
+    app.kubernetes.io/instance: "cloudform"
+rules:
+  - apiGroups:
+      - "*"
+    resources:
+      - "*"
+    verbs:
+      - "*"
+---
+# Source: cloudform/templates/rbac/rolebinding.yaml
+# Bind Portal API to its role in main namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cloudform-full-access-binding
+  labels:
+    app.kubernetes.io/name: "cloudform"
+    app.kubernetes.io/instance: "cloudform"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cloudform-full-access
+subjects:
+---
+# Source: cloudform/templates/frontend/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloudform-frontend
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: frontend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/component: frontend
+---
+# Source: cloudform/templates/portal-api/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloudform-api
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: api
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/component: api
+---
+# Source: cloudform/templates/terminal-service/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloudform-terminal
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: terminal
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8081
+    targetPort: ws
+    protocol: TCP
+    name: ws
+  selector:
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/component: terminal
+---
+# Source: cloudform/templates/frontend/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudform-frontend
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cloudform
+      app.kubernetes.io/instance: cloudform
+      app.kubernetes.io/component: frontend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cloudform
+        app.kubernetes.io/instance: cloudform
+        app.kubernetes.io/component: frontend
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: frontend
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+        image: "ghcr.io/htsnc-ops/cloudform-api:1.0.4"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        env:
+        - name: API_URL
+          value: "/api"
+        - name: WS_URL
+          value: "/ws"
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        volumeMounts:
+        - name: run
+          mountPath: /run
+        - name: tmp
+          mountPath: /tmp
+        - name: cache
+          mountPath: /var/cache/nginx
+      volumes:
+      - name: run
+        emptyDir: {}
+      - name: tmp
+        emptyDir: {}
+      - name: cache
+        emptyDir: {}
+---
+# Source: cloudform/templates/portal-api/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudform-api
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: api
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cloudform
+      app.kubernetes.io/instance: cloudform
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cloudform
+        app.kubernetes.io/instance: cloudform
+        app.kubernetes.io/component: api
+      annotations:
+        checksum/config: d327ad3576eca095df282659e4164a92d4bb60b083c54c428970364681e06b9c
+    spec:
+      serviceAccountName: 
+      securityContext:
+        fsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: api
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+        image: "ghcr.io/htsnc-ops/cloudform-api:1.0.4"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        env:
+        - name: PORT
+          value: "8080"
+        - name: LOG_LEVEL
+          value: "info"
+        - name: SESSION_TIMEOUT
+          value: "3600"
+        - name: MAX_CONTAINERS_PER_USER
+          value: "5"
+        - name: CONTAINER_NAMESPACE
+          value: "cloudform-containers"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: cloudform-secrets
+              key: database-url
+        - name: KEYCLOAK_URL
+          value: "http://cloudform-keycloak:8080"
+        - name: KEYCLOAK_REALM
+          value: "cloudform"
+        - name: KEYCLOAK_CLIENT_ID
+          value: "cloudform-api"
+        - name: KEYCLOAK_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: cloudform-secrets
+              key: keycloak-client-secret
+        - name: VAULT_ADDR
+          value: "http://cloudform-vault:8200"
+        - name: VAULT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: cloudform-secrets
+              key: vault-token
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
+---
+# Source: cloudform/templates/terminal-service/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudform-terminal
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: terminal
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cloudform
+      app.kubernetes.io/instance: cloudform
+      app.kubernetes.io/component: terminal
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cloudform
+        app.kubernetes.io/instance: cloudform
+        app.kubernetes.io/component: terminal
+    spec:
+      serviceAccountName: 
+      securityContext:
+        fsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: terminal
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+        image: "ghcr.io/htsnc-ops/cloudform-terminal:1.0.4"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: ws
+          containerPort: 8081
+          protocol: TCP
+        env:
+        - name: WS_PORT
+          value: "8081"
+        - name: WS_PATH
+          value: "/ws/terminal"
+        - name: LOG_LEVEL
+          value: "info"
+        - name: HEARTBEAT_INTERVAL
+          value: "30000"
+        - name: CONNECTION_TIMEOUT
+          value: "300000"
+        - name: MAX_CONNECTIONS_PER_POD
+          value: "100"
+        - name: KUBERNETES_SERVICE_HOST
+          value: "kubernetes.default.svc"
+        - name: KUBERNETES_SERVICE_PORT
+          value: "443"
+        - name: CONTAINER_NAMESPACE
+          value: "cloudform-containers"
+        - name: JWT_PUBLIC_KEY_URL
+          value: "http://cloudform-keycloak:8080/realms/cloudform/protocol/openid-connect/certs"
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
+---
+# Source: cloudform/templates/portal-api/hpa.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cloudform-api
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cloudform-api
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+---
+# Source: cloudform/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cloudform
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/websocket-services: terminal-service
+spec:
+  ingressClassName: nginx-cloudform
+  tls:
+    - hosts:
+        - "cloudform.harbortechnc.com"
+      secretName: cloudform-tls
+  rules:
+    - host: "cloudform.harbortechnc.com"
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api
+                port:
+                  number: 8080
+          - path: /ws
+            pathType: Prefix
+            backend:
+              service:
+                name: cloudform-terminal
+                port:
+                  number: 8081
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: cloudform-keycloak
+                port:
+                  number: 8203
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cloudform-frontend
+                port:
+                  number: 80
+    - host: "cloudform-vault.harbortechnc.com"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cloudform-vault
+                port:
+                  number: 8203
+    - host: "cloudform-keycloak.harbortechnc.com"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cloudform-keycloak
+                port:
+                  number: 8082
+---
+# Source: cloudform/templates/monitoring/prometheusrule.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cloudform
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  groups:
+  - name: cloudform.rules
+    interval: 30s
+    rules:
+    - alert: HighContainerCount
+      expr: cloudportal_active_containers > 50
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: High number of active containers
+    - alert: HighAPILatency
+      expr: cloudportal_api_request_duration_seconds > 1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: API response time is high
+---
+# Source: cloudform/templates/monitoring/servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cloudform-api
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cloudform
+      app.kubernetes.io/instance: cloudform
+      app.kubernetes.io/component: api
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+---
+# Source: cloudform/templates/monitoring/servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cloudform-terminal
+  namespace: harbortech
+  labels:
+    helm.sh/chart: cloudform-1.0.0
+    app.kubernetes.io/name: cloudform
+    app.kubernetes.io/instance: cloudform
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cloudform
+      app.kubernetes.io/instance: cloudform
+      app.kubernetes.io/component: terminal
+  endpoints:
+  - port: ws
+    path: /metrics
+    interval: 30s

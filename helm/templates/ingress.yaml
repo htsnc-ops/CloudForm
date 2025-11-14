@@ -12,10 +12,12 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  ingressClassName: {{ .Values.ingress.className }}
-  {{- if .Values.ingress.tls }}
+  {{- with .Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- with .Values.ingress.tls }}
   tls:
-    {{- range .Values.ingress.tls }}
+    {{- range . }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -23,19 +25,33 @@ spec:
       secretName: {{ .secretName }}
     {{- end }}
   {{- end }}
+
+  {{- /* local convenience: ingress values */}}
+  {{- with .Values.ingress }}
+  {{- $mapping := dict
+      "api" $.Values.portalApi.service.port
+      "cloudform-terminal" $.Values.terminalService.service.port
+      "cloudform-frontend" $.Values.frontend.service.port
+      "cloudform-keycloak" 8080
+      "cloudform-vault" 8200
+    }}
   rules:
-    {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
+    {{- range $host := .hosts }}
+    - host: {{ $host.host | quote }}
       http:
         paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            pathType: {{ .pathType }}
+          {{- range $path := $host.paths }}
+          {{- $backend := $path.backend }}
+          {{- /* path.port overrides mapping; mapping fallback, final fallback 8080 */ -}}
+          {{- $port := default 8080 (default (index $mapping $backend) $path.port) }}
+          - path: {{ $path.path }}
+            pathType: {{ $path.pathType }}
             backend:
               service:
-                name: {{ include "cloudform.fullname" $ }}-{{ .backend }}
+                name: {{ $backend}}
                 port:
-                  number: {{ if eq .backend "api" }}{{ $.Values.portalApi.service.port }}{{ else if eq .backend "terminal-service" }}{{ $.Values.terminalService.service.port }}{{ else if eq .backend "frontend" }}{{ $.Values.frontend.service.port }}{{ else }}8080{{ end }}
+                  number: {{ $port }}
           {{- end }}
     {{- end }}
+  {{- end }}
 {{- end }}
