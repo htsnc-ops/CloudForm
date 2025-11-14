@@ -27,12 +27,12 @@ spec:
   {{- end }}
 
   {{- /* local convenience: ingress values */}}
+  # "cloudform-keycloak" 8080 removed because cloudform was not free - need to replace with another auth
   {{- with .Values.ingress }}
   {{- $mapping := dict
       "api" $.Values.portalApi.service.port
       "cloudform-terminal" $.Values.terminalService.service.port
       "cloudform-frontend" $.Values.frontend.service.port
-      "cloudform-keycloak" 8080
       "cloudform-vault" 8200
     }}
   rules:

@@ -164,10 +164,10 @@ ingress:
           pathType: Prefix
           backend: cloudform-terminal
           port: 8081
-        - path: /auth
-          pathType: Prefix
-          backend: cloudform-keycloak
-          port: 8203
+        # - path: /auth
+        #   pathType: Prefix
+        #   backend: cloudform-keycloak # replace keycloak with something that can be used as auth
+        #   port: 8203
         - path: /
           pathType: Prefix
           backend: cloudform-frontend
@@ -178,12 +178,12 @@ ingress:
           pathType: Prefix
           backend: cloudform-vault
           port: 8203
-    - host: cloudform-keycloak.harbortechnc.com
-      paths:
-        - path: /
-          pathType: Prefix
-          backend: cloudform-keycloak
-          port: 8082
+    # - host: cloudform-keycloak.harbortechnc.com
+    #   paths:
+    #     - path: /
+    #       pathType: Prefix
+    #       backend: cloudform-keycloak
+    #       port: 8082
   
   tls:
     - secretName: cloudform-tls
