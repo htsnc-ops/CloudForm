@@ -6,6 +6,7 @@
 GITHUB_USER=${GITHUB_USER:-"htsnc-ops"}
 VERSION=${VERSION:-"$1"}
 REGISTRY="ghcr.io"
+PLATFORM="linux/amd64"     # linux/arm64 - mac-based build; linux/amd64 - windows-based build
 
 echo "================================"
 echo "Building Cloud Portal Images"
@@ -26,13 +27,14 @@ echo ""
 #     echo "  echo \$GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin"
 #     exit 1
 # fi
-
+echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
 echo "✓ Logged in to GHCR"
 echo ""
 
 # Build API
 echo "📦 Building Portal API..."
-docker buildx build -t $REGISTRY/$GITHUB_USER/cloudform-api:$VERSION \
+docker buildx build --platform $PLATFORM \
+    -t $REGISTRY/$GITHUB_USER/cloudform-api:$VERSION \
     -t $REGISTRY/$GITHUB_USER/cloudform-api:latest \
     -f Dockerfile.api --push .
 echo "✓ Portal API built and pushed"
@@ -40,7 +42,8 @@ echo ""
 
 # Build Terminal
 echo "📦 Building Terminal Service..."
-docker buildx build -t $REGISTRY/$GITHUB_USER/cloudform-terminal:$VERSION \
+docker buildx build --platform $PLATFORM \
+    -t $REGISTRY/$GITHUB_USER/cloudform-terminal:$VERSION \
     -t $REGISTRY/$GITHUB_USER/cloudform-terminal:latest \
     -f Dockerfile.terminal --push .
 echo "✓ Terminal Service built and pushed"
@@ -48,7 +51,8 @@ echo ""
 
 # Build Frontend
 echo "📦 Building Frontend..."
-docker buildx build -t $REGISTRY/$GITHUB_USER/cloudform-frontend:$VERSION \
+docker buildx build --platform $PLATFORM \
+    -t $REGISTRY/$GITHUB_USER/cloudform-frontend:$VERSION \
     -t $REGISTRY/$GITHUB_USER/cloudform-frontend:latest \
     -f Dockerfile.frontend --push .
 echo "✓ Frontend built and pushed"

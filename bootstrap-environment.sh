@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+SHELL_ENV=.zshrc
+
 brew install kubectl
 
 brew install minikube
@@ -5,6 +9,8 @@ brew install minikube
 minikube start
 
 kubectl create namespace argocd
+kubectl create namespace harbortech
+kubectl create namespace cloudform-containers
 
 # Install ArgoCD using the official manifest
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
@@ -19,9 +25,15 @@ kubectl port-forward svc/argocd-server -n argocd 8080:443
 kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d
 
 # Install dependencies for Linux
-# test -d ~/.linuxbrew && eval "$(~/.linuxbrew/bin/brew shellenv)"
-# test -d /home/linuxbrew/.linuxbrew && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-# echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >> ~/.bashrc
+if command -v brew >/dev/null 2>&1; then
+    echo "Homebrew is installed."
+else
+    echo "Homebrew is not installed. Installing..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    echo >> /home/$USERNAME/$SHELL_ENV
+    echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /home/$USERNAME/$SHELL_ENV
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
 
 # Install dependencies macos
 # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
