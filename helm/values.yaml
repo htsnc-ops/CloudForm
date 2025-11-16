@@ -189,6 +189,7 @@ ingress:
     - secretName: cloudform-tls
       hosts:
         - cloudform.harbortechnc.com
+        - cloudform-vault.harbortechnc.com 
 
 # Keycloak (Auth)
 keycloak:
