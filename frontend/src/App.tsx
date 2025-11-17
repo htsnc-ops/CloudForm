@@ -1,44 +1,62 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useClients } from './hooks/useClients';
 import ClientsList from './components/Clients/ClientsList';
 import TerminalView from './components/Terminal/TerminalView';
 import BrowserView from './components/Browser/BrowserView';
 import Login from './components/Auth/Login';
-import { useClients } from './hooks/useClients';
-import './styles/index.css';
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const { clients, loadClients } = useClients();
+  const { clients, fetchClients } = useClients();
 
   useEffect(() => {
-    loadClients();
-  }, [loadClients]);
+    fetchClients();
+  }, [fetchClients]);
 
-  const handleLogin = () => {
-    setIsAuthenticated(true);
+  const handleLogin = (password: string) => {
+    if (password === 'admin123') {
+      setIsAuthenticated(true);
+    } else {
+      alert('Invalid password');
+    }
+  };
+
+  const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+    return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
   };
 
   return (
     <Router>
       <div className="min-h-screen bg-slate-900 text-white">
-        <Switch>
-          <Route path="/login">
-            <Login onLogin={handleLogin} />
-          </Route>
-          <Route path="/clients">
-            {isAuthenticated ? <ClientsList clients={clients} /> : <Login onLogin={handleLogin} />}
-          </Route>
-          <Route path="/terminal">
-            {isAuthenticated ? <TerminalView /> : <Login onLogin={handleLogin} />}
-          </Route>
-          <Route path="/browser">
-            {isAuthenticated ? <BrowserView /> : <Login onLogin={handleLogin} />}
-          </Route>
-          <Route path="/">
-            <Login onLogin={handleLogin} />
-          </Route>
-        </Switch>
+        <Routes>
+          <Route path="/login" element={<Login onLogin={handleLogin} />} />
+          <Route
+            path="/clients"
+            element={
+              <ProtectedRoute>
+                <ClientsList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/terminal/:clientId"
+            element={
+              <ProtectedRoute>
+                <TerminalView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/browser/:clientId"
+            element={
+              <ProtectedRoute>
+                <BrowserView />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/" element={<Navigate to="/login" replace />} />
+        </Routes>
       </div>
     </Router>
   );

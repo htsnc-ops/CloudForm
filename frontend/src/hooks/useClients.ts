@@ -1,56 +1,62 @@
 import { useState, useEffect } from 'react';
-import api from '../services/api';
 
-const useClients = () => {
-  const [clients, setClients] = useState([]);
+interface Client {
+  id: string;
+  name: string;
+  cloudProvider: string;
+  authType: string;
+  status: string;
+  createdAt?: string;
+}
+
+export const useClients = () => {
+  const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchClients = async () => {
+    try {
+      setLoading(true);
+      // TODO: Replace with actual API call
+      // const response = await api.clients.list();
+      // setClients(response);
+      
+      // Mock data for now
+      setClients([
+        {
+          id: '1',
+          name: 'Demo Client A',
+          cloudProvider: 'azure',
+          authType: 'service-principal',
+          status: 'ready',
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch clients');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const response = await api.get('/clients');
-        setClients(response.data);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchClients();
   }, []);
 
-  const addClient = async (clientData) => {
-    try {
-      const response = await api.post('/clients', clientData);
-      setClients((prevClients) => [...prevClients, response.data]);
-    } catch (err) {
-      setError(err);
-    }
+  const addClient = (client: Client) => {
+    setClients([...clients, client]);
   };
 
-  const updateClient = async (clientId, updatedData) => {
-    try {
-      const response = await api.put(`/clients/${clientId}`, updatedData);
-      setClients((prevClients) =>
-        prevClients.map((client) => (client.id === clientId ? response.data : client))
-      );
-    } catch (err) {
-      setError(err);
-    }
+  const removeClient = (id: string) => {
+    setClients(clients.filter((c) => c.id !== id));
   };
 
-  const deleteClient = async (clientId) => {
-    try {
-      await api.delete(`/clients/${clientId}`);
-      setClients((prevClients) => prevClients.filter((client) => client.id !== clientId));
-    } catch (err) {
-      setError(err);
-    }
+  return {
+    clients,
+    loading,
+    error,
+    fetchClients,
+    addClient,
+    removeClient,
   };
-
-  return { clients, loading, error, addClient, updateClient, deleteClient };
 };
-
-export default useClients;

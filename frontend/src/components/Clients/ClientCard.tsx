@@ -1,32 +1,78 @@
 import React from 'react';
-import { Cloud, Key } from 'lucide-react';
 
-const ClientCard = ({ client, onSelect }) => {
+interface ClientCardProps {
+  id: string;
+  name: string;
+  cloudProvider: string;
+  status: string;
+  onClick?: () => void;
+}
+
+export const ClientCard: React.FC<ClientCardProps> = ({
+  name,
+  cloudProvider,
+  status,
+  onClick,
+}) => {
+  const providerColors: Record<string, string> = {
+    azure: '#0078D4',
+    aws: '#FF9900',
+    gcp: '#4285F4',
+  };
+
+  const statusColors: Record<string, string> = {
+    ready: '#22c55e',
+    creating: '#eab308',
+    error: '#ef4444',
+  };
+
   return (
     <div
-      className="bg-slate-800 rounded-lg p-6 border border-slate-700 hover:border-blue-500 transition-colors cursor-pointer"
-      onClick={() => onSelect(client)}
+      onClick={onClick}
+      style={{
+        padding: '20px',
+        background: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: '12px',
+        cursor: 'pointer',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        transition: 'all 0.2s',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-2px)';
+        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'none';
+      }}
     >
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-blue-600 rounded-lg">
-            <Cloud className="w-6 h-6" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-lg">{client.name}</h3>
-            <p className="text-sm text-slate-400">{client.cloudProvider.toUpperCase()}</p>
-          </div>
-        </div>
-        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+        <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', margin: 0 }}>{name}</h3>
+        <div
+          style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            backgroundColor: statusColors[status] || '#6b7280',
+          }}
+        />
       </div>
-      <div className="space-y-2 text-sm">
-        <div className="flex items-center space-x-2 text-slate-400">
-          <Key className="w-4 h-4" />
-          <span>{client.credentials.type}</span>
-        </div>
-        <div className="text-slate-500 text-xs">
-          Created: {new Date(client.createdAt).toLocaleDateString()}
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <span
+          style={{
+            padding: '4px 12px',
+            borderRadius: '6px',
+            fontSize: '0.85rem',
+            backgroundColor: providerColors[cloudProvider] || '#6b7280',
+            color: 'white',
+            fontWeight: '500',
+          }}
+        >
+          {cloudProvider.toUpperCase()}
+        </span>
+        <span style={{ fontSize: '0.85rem', opacity: 0.7 }}>
+          {status}
+        </span>
       </div>
     </div>
   );

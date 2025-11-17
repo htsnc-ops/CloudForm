@@ -1,19 +1,22 @@
 import React from 'react';
 import { Globe } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 
-const BrowserView = ({ cloudProvider }) => {
-  const getPortalUrl = () => {
-    switch (cloudProvider) {
-      case 'azure':
-        return 'https://portal.azure.com';
-      case 'aws':
-        return 'https://console.aws.amazon.com';
-      case 'gcp':
-        return 'https://console.cloud.google.com';
-      default:
-        return '#';
-    }
+interface BrowserViewProps {
+  clientId?: string;
+}
+
+export const BrowserView: React.FC<BrowserViewProps> = () => {
+  const { clientId } = useParams<{ clientId: string }>();
+  
+  const urls: Record<string, string> = {
+    azure: 'https://portal.azure.com',
+    aws: 'https://console.aws.amazon.com',
+    gcp: 'https://console.cloud.google.com',
   };
+
+  // Default to azure if not specified
+  const cloudProvider = 'azure';
 
   return (
     <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
@@ -35,7 +38,7 @@ const BrowserView = ({ cloudProvider }) => {
             The container would handle SSO/authentication automatically
           </p>
           <a
-            href={getPortalUrl()}
+            href={urls[cloudProvider]}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"

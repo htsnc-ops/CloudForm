@@ -1,51 +1,68 @@
 import React, { useState, useEffect } from 'react';
-import { Terminal as TerminalIcon } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 
-const TerminalView = ({ selectedClient, executeCommand }) => {
-  const [commandInput, setCommandInput] = useState('');
-  const [terminalOutput, setTerminalOutput] = useState([]);
+interface TerminalViewProps {
+  selectedClient?: any;
+  executeCommand?: any;
+}
 
-  const handleCommandExecution = (cmd) => {
-    const timestamp = new Date().toLocaleTimeString();
-    setTerminalOutput(prev => [...prev, { type: 'command', text: `[${timestamp}] $ ${cmd}` }]);
-    
-    executeCommand(cmd).then(response => {
-      setTerminalOutput(prev => [...prev, { type: 'output', text: response }]);
-    });
+export const TerminalView: React.FC<TerminalViewProps> = () => {
+  const { clientId } = useParams<{ clientId: string }>();
+  const [output, setOutput] = useState<string[]>([
+    'Connected to client terminal',
+    '$ Ready for commands...',
+  ]);
+  const [input, setInput] = useState('');
 
-    setCommandInput('');
+  const handleCommand = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    setOutput([...output, `$ ${input}`, `Command received: ${input}`]);
+    setInput('');
   };
 
   return (
-    <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
-      <div className="bg-slate-900 px-4 py-2 flex items-center justify-between border-b border-slate-700">
-        <div className="flex items-center space-x-2">
-          <TerminalIcon className="w-5 h-5 text-blue-400" />
-          <span className="text-sm text-slate-400">{selectedClient.name} Terminal</span>
-        </div>
+    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '20px' }}>
+        <h2>Terminal - Client {clientId || 'Unknown'}</h2>
       </div>
-      <div className="p-4 h-96 overflow-y-auto font-mono text-sm">
-        {terminalOutput.map((line, idx) => (
-          <div key={idx} className={`mb-1 ${
-            line.type === 'command' ? 'text-green-400' :
-            line.type === 'output' ? 'text-slate-300' :
-            'text-slate-300'
-          }`}>
-            {line.text}
+      <div
+        style={{
+          background: '#1e1e1e',
+          padding: '20px',
+          borderRadius: '8px',
+          fontFamily: 'monospace',
+          minHeight: '500px',
+          maxHeight: '70vh',
+          overflowY: 'auto',
+          color: '#00ff00',
+        }}
+      >
+        {output.map((line, idx) => (
+          <div key={idx} style={{ marginBottom: '4px' }}>
+            {line}
           </div>
         ))}
-        <div className="flex items-center space-x-2 mt-2">
-          <span className="text-green-400">$</span>
+        <form onSubmit={handleCommand} style={{ display: 'flex', marginTop: '10px' }}>
+          <span style={{ marginRight: '8px' }}>$</span>
           <input
             type="text"
-            value={commandInput}
-            onChange={(e) => setCommandInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && commandInput && handleCommandExecution(commandInput)}
-            className="flex-1 bg-transparent outline-none text-white"
-            placeholder="Enter command..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            style={{
+              flex: 1,
+              background: 'transparent',
+              border: 'none',
+              color: '#00ff00',
+              outline: 'none',
+              fontFamily: 'monospace',
+              fontSize: '1rem',
+            }}
+            placeholder="Type a command..."
             autoFocus
           />
-        </div>
+        </form>
       </div>
     </div>
   );

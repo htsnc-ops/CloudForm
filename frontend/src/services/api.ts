@@ -1,28 +1,29 @@
-import axios from 'axios';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api/v1';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
-
-export const login = async (password) => {
-  const response = await axios.post(`${API_BASE_URL}/auth/login`, { password });
-  return response.data;
-};
-
-export const fetchClients = async () => {
-  const response = await axios.get(`${API_BASE_URL}/clients`);
-  return response.data;
-};
-
-export const addClient = async (clientData) => {
-  const response = await axios.post(`${API_BASE_URL}/clients`, clientData);
-  return response.data;
-};
-
-export const deleteClient = async (clientId) => {
-  const response = await axios.delete(`${API_BASE_URL}/clients/${clientId}`);
-  return response.data;
-};
-
-export const executeCommand = async (clientId, command) => {
-  const response = await axios.post(`${API_BASE_URL}/terminal/execute`, { clientId, command });
-  return response.data;
+export const api = {
+  clients: {
+    list: async () => {
+      const response = await fetch(`${API_BASE_URL}/clients`);
+      if (!response.ok) throw new Error('Failed to fetch clients');
+      return response.json();
+    },
+    
+    create: async (data: any) => {
+      const response = await fetch(`${API_BASE_URL}/clients`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to create client');
+      return response.json();
+    },
+    
+    delete: async (id: string) => {
+      const response = await fetch(`${API_BASE_URL}/clients/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete client');
+      return response.json();
+    },
+  },
 };

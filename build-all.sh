@@ -31,23 +31,23 @@ echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
 echo "✓ Logged in to GHCR"
 echo ""
 
-# Build API
-echo "📦 Building Portal API..."
-docker buildx build --platform $PLATFORM \
-    -t $REGISTRY/$GITHUB_USER/cloudform-api:$VERSION \
-    -t $REGISTRY/$GITHUB_USER/cloudform-api:latest \
-    -f Dockerfile.api --push .
-echo "✓ Portal API built and pushed"
-echo ""
+# # Build API
+# echo "📦 Building Portal API..."
+# docker buildx build --platform $PLATFORM \
+#     -t $REGISTRY/$GITHUB_USER/cloudform-api:$VERSION \
+#     -t $REGISTRY/$GITHUB_USER/cloudform-api:latest \
+#     -f Dockerfile.api --push .
+# echo "✓ Portal API built and pushed"
+# echo ""
 
-# Build Terminal
-echo "📦 Building Terminal Service..."
-docker buildx build --platform $PLATFORM \
-    -t $REGISTRY/$GITHUB_USER/cloudform-terminal:$VERSION \
-    -t $REGISTRY/$GITHUB_USER/cloudform-terminal:latest \
-    -f Dockerfile.terminal --push .
-echo "✓ Terminal Service built and pushed"
-echo ""
+# # Build Terminal
+# echo "📦 Building Terminal Service..."
+# docker buildx build --platform $PLATFORM \
+#     -t $REGISTRY/$GITHUB_USER/cloudform-terminal:$VERSION \
+#     -t $REGISTRY/$GITHUB_USER/cloudform-terminal:latest \
+#     -f Dockerfile.terminal --push .
+# echo "✓ Terminal Service built and pushed"
+# echo ""
 
 # Build Frontend
 echo "📦 Building Frontend..."

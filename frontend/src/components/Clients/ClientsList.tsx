@@ -9,9 +9,9 @@ const ClientsList = () => {
     return <div className="text-center text-slate-400">Loading clients...</div>;
   }
 
-  if (error) {
-    return <div className="text-center text-red-500">Error loading clients: {error.message}</div>;
-  }
+ if (error) {
+  return <div className="text-center text-red-500">Error loading clients: {error}</div>;
+}
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -21,7 +21,13 @@ const ClientsList = () => {
         </div>
       ) : (
         clients.map(client => (
-          <ClientCard key={client.id} client={client} />
+          <ClientCard 
+            key={client.id} 
+            id={client.id}
+            name={client.name}
+            cloudProvider={client.cloudProvider}
+            status={client.status}
+          />
         ))
       )}
     </div>

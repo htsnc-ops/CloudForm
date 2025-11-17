@@ -15,9 +15,9 @@ COPY frontend/nginx.conf ./
 RUN npm install && \
     npm cache clean --force
 
-# Copy source code (but not node_modules from host)
-COPY frontend/public ./public
-COPY frontend/src ./src
+# Copy TypeScript config and other root files
+COPY frontend/tsconfig.json* ./
+COPY frontend/ .
 
 # Build production bundle
 RUN npm run build
