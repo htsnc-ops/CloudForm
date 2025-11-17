@@ -1,22 +1,32 @@
 {
-    "name": "cloud-portal-api",
-    "version": "1.0.0",
-    "description": "Cloud Portal API Service",
-    "main": "src/index.js",
-    "scripts": {
-        "start": "node src/index.js",
-        "dev": "nodemon src/index.js"
-    },
-    "dependencies": {
-        "@kubernetes/client-node": "^1.4.0",
-        "axios": "^1.6.2",
-        "cors": "^2.8.5",
-        "express": "^4.18.2",
-        "jsonwebtoken": "^9.0.2",
-        "jwks-rsa": "^3.1.0",
-        "pg": "^8.11.3"
-    },
-    "devDependencies": {
-        "nodemon": "^3.0.2"
-    }
+  "name": "cloud-management-api",
+  "version": "1.0.0",
+  "description": "API service for the multi-tenant cloud management portal.",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint . --ext .ts"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.10.9",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.8",
+    "@types/jest": "^26.0.0",
+    "@types/mongoose": "^5.10.0",
+    "@types/node": "^14.14.6",
+    "jest": "^26.6.0",
+    "ts-jest": "^26.5.0",
+    "typescript": "^4.1.2",
+    "eslint": "^7.11.0",
+    "@typescript-eslint/eslint-plugin": "^4.11.0",
+    "@typescript-eslint/parser": "^4.11.0"
+  },
+  "license": "MIT"
 }
