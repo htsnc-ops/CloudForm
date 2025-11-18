@@ -27,7 +27,7 @@ echo ""
 #     echo "  echo \$GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin"
 #     exit 1
 # fi
-echo GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
+echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
 echo "✓ Logged in to GHCR"
 echo ""
 
