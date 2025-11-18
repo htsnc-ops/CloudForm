@@ -359,5 +359,15 @@ persistence:
   accessMode: ReadWriteOnce
   size: 10Gi
 
-
+config:
+  backend:
+    CONTAINER_NAMESPACE: "{{ .Values.containers.namespace }}"
+    AZURE_IMAGE: "{{ .Values.containers.images.azure }}"
+    AWS_IMAGE: "{{ .Values.containers.images.aws }}"
+    GCP_IMAGE: "{{ .Values.containers.images.gcp }}"
+    DEFAULT_TIMEOUT: "{{ .Values.containers.defaultTimeout }}"
+    IDLE_TIMEOUT: "{{ .Values.containers.idleTimeout }}"
+    CLEANUP_INTERVAL: "{{ .Values.containers.cleanupInterval }}"
+    PORT: "8080"
+    LOG_LEVEL: "info"
 ## Add support for configfiles
