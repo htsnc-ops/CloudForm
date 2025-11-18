@@ -34,24 +34,24 @@ echo ""
 
 # Build API
 echo "📦 Building Portal API..."
-docker buildx build -t $REGISTRY/$GITHUB_USER/cloudform-api:$VERSION \
-    -t $REGISTRY/$GITHUB_USER/cloudform-api:latest \
+docker buildx build $REGISTRY/$GITHUB_USER/cloudform-api:$VERSION \
+    $REGISTRY/$GITHUB_USER/cloudform-api:latest \
     -f Dockerfile.api --push .
 echo "✓ Portal API built and pushed"
 echo ""
 
 # Build Terminal
 echo "📦 Building Terminal Service..."
-docker buildx build -t $REGISTRY/$GITHUB_USER/cloudform-terminal:$VERSION \
-    -t $REGISTRY/$GITHUB_USER/cloudform-terminal:latest \
+docker buildx build $REGISTRY/$GITHUB_USER/cloudform-terminal:$VERSION \
+    $REGISTRY/$GITHUB_USER/cloudform-terminal:latest \
     -f Dockerfile.terminal --push .
 echo "✓ Terminal Service built and pushed"
 echo ""
 
 # Build Frontend
 echo "📦 Building Frontend..."
-docker buildx build -t $REGISTRY/$GITHUB_USER/cloudform-frontend:$VERSION \
-    -t $REGISTRY/$GITHUB_USER/cloudform-frontend:latest \
+docker buildx build $REGISTRY/$GITHUB_USER/cloudform-frontend:$VERSION \
+    $REGISTRY/$GITHUB_USER/cloudform-frontend:latest \
     -f Dockerfile.frontend --push .
 echo "✓ Frontend built and pushed"
 echo ""
