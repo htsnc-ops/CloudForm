@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Globe } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 
@@ -8,6 +9,7 @@ interface BrowserViewProps {
 
 export const BrowserView: React.FC<BrowserViewProps> = () => {
   const { clientId } = useParams<{ clientId: string }>();
+  const navigate = useNavigate();
   
   const urls: Record<string, string> = {
     azure: 'https://portal.azure.com',
