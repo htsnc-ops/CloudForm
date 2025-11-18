@@ -60,7 +60,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ include "cloudform.fullname" . }}-terminal
+  name: {{ include "cloudform.fullname" . }}-backend
   namespace: {{ .Values.namespace }}
   labels:
     {{- include "cloudform.labels" . | nindent 4 }}
@@ -68,7 +68,7 @@ spec:
   podSelector:
     matchLabels:
       {{- include "cloudform.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: terminal
+      app.kubernetes.io/component: backend
   policyTypes:
     - Ingress
     - Egress
@@ -157,7 +157,7 @@ spec:
           name: {{ .Values.namespace }}
       podSelector:
         matchLabels:
-          app.kubernetes.io/component: terminal
+          app.kubernetes.io/component: backend
     - namespaceSelector:
         matchLabels:
           name: {{ .Values.namespace }}

@@ -1,69 +1,51 @@
+{{- if .Values.backendEnabled -}}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "cloudform.fullname" . }}-terminal
-  namespace: {{ .Values.namespace }}
+  name: {{ include "cloudform.fullname" . }}-backend
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "cloudform.labels" . | nindent 4 }}
-    app.kubernetes.io/component: terminal
+    app.kubernetes.io/component: backend
 spec:
-  {{- if not .Values.terminalService.autoscaling.enabled }}
-  replicas: {{ .Values.terminalService.replicaCount }}
-  {{- end }}
+  replicas: {{ .Values.backend.replicaCount | default 1 }}
   selector:
     matchLabels:
       {{- include "cloudform.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: terminal
+      app.kubernetes.io/component: backend
   template:
     metadata:
       labels:
         {{- include "cloudform.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: terminal
+        app.kubernetes.io/component: backend
     spec:
-      {{- with .Values.global.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ .Values.rbac.terminalService.name }}
-      securityContext:
-        {{- toYaml .Values.security.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ include "cloudform.serviceAccountName" . }}
       containers:
-      - name: terminal
-        securityContext:
-          {{- toYaml .Values.security.containerSecurityContext | nindent 10 }}
-        image: "{{ .Values.terminalService.image.repository }}:{{ .Values.htsnc.tag }}"
-        imagePullPolicy: {{ .Values.terminalService.image.pullPolicy }}
+      - name: backend
+        image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.backend.image.pullPolicy | default "IfNotPresent" }}
         ports:
-        - name: ws
-          containerPort: {{ .Values.terminalService.service.targetPort }}
+        - name: http
+          containerPort: 8080
           protocol: TCP
         env:
-        - name: WS_PORT
-          value: "{{ .Values.terminalService.service.targetPort }}"
-        - name: WS_PATH
-          value: "/ws/terminal"
-        - name: LOG_LEVEL
-          value: "{{ .Values.terminalService.env.logLevel }}"
-        - name: HEARTBEAT_INTERVAL
-          value: "{{ .Values.terminalService.env.heartbeatInterval }}"
-        - name: CONNECTION_TIMEOUT
-          value: "{{ .Values.terminalService.env.connectionTimeout }}"
-        - name: MAX_CONNECTIONS_PER_POD
-          value: "{{ .Values.terminalService.env.maxConnectionsPerPod }}"
-        - name: KUBERNETES_SERVICE_HOST
-          value: "kubernetes.default.svc"
-        - name: KUBERNETES_SERVICE_PORT
-          value: "443"
-        - name: CONTAINER_NAMESPACE
-          value: "{{ .Values.containers.namespace }}"
-        - name: JWT_PUBLIC_KEY_URL
-          value: "http://{{ .Release.Name }}-keycloak:8080/realms/cloudform/protocol/openid-connect/certs"
+        {{- range $key, $value := .Values.config.backend }}
+        - name: {{ $key }}
+          value: {{ tpl $value $ | quote }}
+        {{- end }}
         resources:
-          {{- toYaml .Values.terminalService.resources | nindent 10 }}
-        volumeMounts:
-        - name: tmp
-          mountPath: /tmp
-      volumes:
-      - name: tmp
-        emptyDir: {}
+          {{- toYaml .Values.backend.resources | nindent 10 }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+{{- end }}

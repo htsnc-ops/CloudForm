@@ -149,7 +149,7 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/websocket-services: terminal-service
+    nginx.ingress.kubernetes.io/websocket-services: cloudform-backend
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
 
@@ -160,10 +160,10 @@ ingress:
           pathType: Prefix
           backend: cloudform-api
           port: 8080
-        - path: /ws
+        - path: /terminal
           pathType: Prefix
-          backend: cloudform-terminal
-          port: 8081
+          backend: cloudform-backend
+          number: 8080
         # - path: /auth
         #   pathType: Prefix
         #   backend: cloudform-keycloak # replace keycloak with something that can be used as auth
@@ -370,4 +370,7 @@ config:
     CLEANUP_INTERVAL: "{{ .Values.containers.cleanupInterval }}"
     PORT: "8080"
     LOG_LEVEL: "info"
+  frontend:
+    REACT_APP_BACKEND_WS_HOST: "backend-service.default.svc.cluster.local"  # Or your ingress hostname
+    REACT_APP_BACKEND_WS_PORT: "8080"
 ## Add support for configfiles

@@ -31,7 +31,7 @@ spec:
   {{- with .Values.ingress }}
   {{- $mapping := dict
       "api" $.Values.portalApi.service.port
-      "cloudform-terminal" $.Values.terminalService.service.port
+      "cloudform-backend" $.Values.terminalService.service.port
       "cloudform-frontend" $.Values.frontend.service.port
       "cloudform-vault" 8200
     }}
@@ -48,7 +48,7 @@ spec:
             pathType: {{ $path.pathType }}
             backend:
               service:
-                name: {{ $backend}}
+                name: {{ $backend }}
                 port:
                   number: {{ $port }}
           {{- end }}

@@ -1,19 +1,21 @@
+{{- if .Values.backendEnabled -}}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "cloudform.fullname" . }}-terminal
-  namespace: {{ .Values.namespace }}
+  name: {{ include "cloudform.fullname" . }}-backend
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "cloudform.labels" . | nindent 4 }}
-    app.kubernetes.io/component: terminal
+    app.kubernetes.io/component: backend
 spec:
-  type: {{ .Values.terminalService.service.type }}
+  type: {{ .Values.backend.service.type | default "ClusterIP" }}
   ports:
-  - port: {{ .Values.terminalService.service.port }}
-    targetPort: ws
+  - port: {{ .Values.backend.service.port | default 8080 }}
+    targetPort: http
     protocol: TCP
-    name: ws
+    name: http
   selector:
     {{- include "cloudform.selectorLabels" . | nindent 4 }}
-    app.kubernetes.io/component: terminal
+    app.kubernetes.io/component: backend
+{{- end -}}
