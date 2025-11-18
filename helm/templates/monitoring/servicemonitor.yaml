@@ -21,7 +21,7 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "cloudform.fullname" . }}-terminal
+  name: {{ include "cloudform.fullname" . }}-backend
   namespace: {{ .Values.namespace }}
   labels:
     {{- include "cloudform.labels" . | nindent 4 }}
@@ -29,7 +29,7 @@ spec:
   selector:
     matchLabels:
       {{- include "cloudform.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: terminal
+      app.kubernetes.io/component: backend
   endpoints:
   - port: ws
     path: /metrics
