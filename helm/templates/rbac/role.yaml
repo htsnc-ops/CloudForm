@@ -16,4 +16,31 @@ rules:
       - "*"
     verbs:
       - "*"
+---
+# role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cloudform-pod-manager
+  namespace: cloudform-containers
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - "pods"
+  - "pods/log"
+  - "pods/status"
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+  - "delete"
+  - "create"
+- apiGroups:
+  - ""
+  resources:
+  - "pods/exec"
+  verbs:
+  - "create"
+  - "get"
 {{- end }}

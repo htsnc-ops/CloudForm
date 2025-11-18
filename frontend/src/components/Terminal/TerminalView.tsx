@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+// @refresh reset
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
@@ -6,12 +7,15 @@ import 'xterm/css/xterm.css';
 
 export const TerminalView: React.FC = () => {
   const terminalRef = useRef<HTMLDivElement>(null);
+  const terminalInstanceRef = useRef<Terminal | null>(null);
   const { clientId } = useParams<{ clientId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const { cloudProvider = 'azure', name = 'Unknown' } = location.state || {};
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    // Wait for DOM to be ready
     if (!terminalRef.current) return;
 
     const term = new Terminal({
@@ -22,19 +26,35 @@ export const TerminalView: React.FC = () => {
                     cloudProvider === 'aws' ? '#ff9900' : '#4285f4'
       },
       fontSize: 14,
-      fontFamily: 'Menlo, Monaco, "Courier New", monospace'
+      fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+      rows: 30,
+      cols: 80
     });
 
     const fitAddon = new FitAddon();
     term.loadAddon(fitAddon);
+    
+    // Open terminal in the DOM element
     term.open(terminalRef.current);
-    fitAddon.fit();
+    
+    // Wait a tick for the terminal to be fully rendered
+    setTimeout(() => {
+      try {
+        fitAddon.fit();
+        setIsReady(true);
+      } catch (e) {
+        console.error('Error fitting terminal:', e);
+      }
+    }, 0);
+
+    terminalInstanceRef.current = term;
 
     // Connect to backend WebSocket
     const ws = new WebSocket(`ws://localhost:8080/terminal/${clientId}?provider=${cloudProvider}`);
     
     ws.onopen = () => {
       term.writeln(`Connected to ${name} (${cloudProvider.toUpperCase()})`);
+      term.writeln('');
     };
 
     ws.onmessage = (event) => {
@@ -46,12 +66,29 @@ export const TerminalView: React.FC = () => {
     };
 
     term.onData((data) => {
-      ws.send(data);
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(data);
+      }
     });
 
+    // Handle window resize
+    const handleResize = () => {
+      if (terminalInstanceRef.current) {
+        try {
+          fitAddon.fit();
+        } catch (e) {
+          console.error('Error on resize:', e);
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
     return () => {
+      window.removeEventListener('resize', handleResize);
       ws.close();
       term.dispose();
+      terminalInstanceRef.current = null;
     };
   }, [clientId, cloudProvider, name]);
 
@@ -77,9 +114,11 @@ export const TerminalView: React.FC = () => {
         ref={terminalRef} 
         style={{ 
           height: '600px',
+          width: '100%',
           border: '1px solid #374151',
           borderRadius: '8px',
-          padding: '10px'
+          padding: '10px',
+          boxSizing: 'border-box'
         }} 
       />
     </div>
