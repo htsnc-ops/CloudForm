@@ -1,15 +1,15 @@
-import { Request, Response } from 'express';
-import { authService } from '../services/authService';
+import { Request, Response, NextFunction } from 'express';
+import { authenticateUser, verifyToken } from '../services/authService';
 
 // Login controller
 export const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
-
   try {
-    const token = await authService.login(username, password);
+    const { token } = authenticateUser(username, password);
     res.status(200).json({ token });
   } catch (error) {
-    res.status(401).json({ message: error.message });
+    const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+    res.status(401).json({ message: errorMessage });
   }
 };
 
@@ -20,16 +20,17 @@ export const logout = (req: Request, res: Response) => {
 };
 
 // Middleware to check authentication
-export const isAuthenticated = (req: Request, res: Response, next: Function) => {
-  const token = req.headers['authorization'];
+export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = Array.isArray(authHeader) ? authHeader[0] : authHeader;
 
   if (!token) {
     return res.status(403).json({ message: 'No token provided' });
   }
 
   try {
-    const decoded = authService.verifyToken(token);
-    req.user = decoded; // Attach user info to request
+    const decoded = verifyToken(token);
+    (req as any).user = decoded; // Attach user info to request
     next();
   } catch (error) {
     return res.status(401).json({ message: 'Unauthorized' });

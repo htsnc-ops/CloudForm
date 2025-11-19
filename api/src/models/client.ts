@@ -1,5 +1,20 @@
 import { Schema, model } from 'mongoose';
 
+export interface Client {
+  id: string;
+  name: string;
+  cloudProvider: 'azure' | 'aws' | 'gcp';
+  credentials: {
+    type: 'service-principal' | 'iam-role' | 'service-account';
+    clientId: string;
+    clientSecret: string;
+    tenantId?: string;
+    subscriptionId?: string;
+  };
+  containerEndpoint: string;
+  createdAt: string;
+}
+
 const clientSchema = new Schema({
   name: {
     type: String,

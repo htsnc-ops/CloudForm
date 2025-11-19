@@ -6,7 +6,7 @@ import {
   deleteClient,
   getClientById
 } from '../controllers/clientsController';
-import { authenticate } from '../middleware/authMiddleware';
+import authenticate from '../middleware/authMiddleware';
 
 const router = Router();
 

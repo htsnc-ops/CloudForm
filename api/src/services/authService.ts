@@ -24,12 +24,14 @@ export const verifyToken = (token: string) => {
 export const login = (req: Request, res: Response) => {
   const { username, password } = req.body;
   try {
-    const { token } = authenticateUser(username, password);
-    res.json({ token });
-  } catch (error) {
-    res.status(401).json({ message: error.message });
+  const { token } = authenticateUser(username, password);
+  res.json({ token });
+} catch (error) {
+  const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+  res.status(401).json({ message: errorMessage });
   }
 };
+
 
 export const logout = (req: Request, res: Response) => {
   // Invalidate the token on the client side

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { executeCommand } from '../controllers/terminalController';
-import { authenticate } from '../middleware/authMiddleware';
+import authenticate from '../middleware/authMiddleware';
 
 const router = Router();
 
