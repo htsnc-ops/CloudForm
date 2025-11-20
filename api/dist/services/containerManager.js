@@ -1,16 +1,19 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContainerManager = void 0;
-const storage_1 = require("./storage");
+const storage_1 = __importDefault(require("./storage"));
 class ContainerManager {
     constructor() {
         this.clients = [];
         this.loadClients();
     }
     async loadClients() {
-        const storedClients = await (0, storage_1.getStorage)('cloud-portal-clients');
-        if (storedClients) {
-            this.clients = JSON.parse(storedClients);
+        const storedClients = await storage_1.default.get('cloud-portal-clients');
+        if (storedClients.value) {
+            this.clients = JSON.parse(storedClients.value);
         }
     }
     async addClient(clientData) {
@@ -26,10 +29,25 @@ class ContainerManager {
         return this.clients;
     }
     async saveClients() {
-        await (0, storage_1.setStorage)('cloud-portal-clients', JSON.stringify(this.clients));
+        await storage_1.default.set('cloud-portal-clients', JSON.stringify(this.clients));
     }
     async getClientById(clientId) {
         return this.clients.find(client => client.id === clientId);
+    }
+    async executeCommand(clientId, command) {
+        // Simulate command execution
+        const client = await this.getClientById(clientId);
+        if (!client) {
+            throw new Error('Client not found');
+        }
+        return `Executed command "${command}" on client ${client.name}`;
+    }
+    async getStatus(clientId) {
+        const client = await this.getClientById(clientId);
+        if (!client) {
+            throw new Error('Client not found');
+        }
+        return 'connected';
     }
 }
 exports.ContainerManager = ContainerManager;

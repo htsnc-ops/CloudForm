@@ -6,11 +6,12 @@ const authService_1 = require("../services/authService");
 const login = async (req, res) => {
     const { username, password } = req.body;
     try {
-        const token = await authService_1.authService.login(username, password);
+        const { token } = (0, authService_1.authenticateUser)(username, password);
         res.status(200).json({ token });
     }
     catch (error) {
-        res.status(401).json({ message: error.message });
+        const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+        res.status(401).json({ message: errorMessage });
     }
 };
 exports.login = login;
@@ -22,12 +23,13 @@ const logout = (req, res) => {
 exports.logout = logout;
 // Middleware to check authentication
 const isAuthenticated = (req, res, next) => {
-    const token = req.headers['authorization'];
+    const authHeader = req.headers['authorization'];
+    const token = Array.isArray(authHeader) ? authHeader[0] : authHeader;
     if (!token) {
         return res.status(403).json({ message: 'No token provided' });
     }
     try {
-        const decoded = authService_1.authService.verifyToken(token);
+        const decoded = (0, authService_1.verifyToken)(token);
         req.user = decoded; // Attach user info to request
         next();
     }
