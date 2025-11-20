@@ -65,7 +65,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             Login
           </button>
           <p style={{ marginTop: '12px', fontSize: '0.85rem', textAlign: 'center', opacity: 0.7 }}>
-            Default: admin123
+            Powered by: HarborTech Solutions, LLC.
           </p>
         </form>
       </div>
